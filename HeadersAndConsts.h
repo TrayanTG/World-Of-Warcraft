@@ -11,6 +11,7 @@
 #include <fstream>
 #include <stdio.h> 
 #include <time.h>
+#include <direct.h>
 
 const int MAX_INFOBOX_WIDTH = 16;
 const int MAX_PATH_LENGHT = 64;
@@ -32,6 +33,8 @@ const int DEF_LIST_SIZE = 64;
 const int DEF_LEVEL_EXP[MAX_LEVEL - 1] = { 50, 75, 100, 150, 200, 250, 400, 750, 1000 };
 const int DEF_FRAME_WIDTH = MAX_NAME_LENGHT + 5; // " (..)"
 const int DEF_FRAME_HEIGHT = 4;
+const int DEF_CHARACTER_WIDTH = 36;
+const int DEF_CHARACTER_HEIGHT = (DEF_CHARACTER_WIDTH * 2) / 3;
 
 const double DOUBLE_PRECISION = 0.00001;
 

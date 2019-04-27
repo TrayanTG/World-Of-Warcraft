@@ -1,6 +1,5 @@
 #pragma once
 #include "HeadersAndConsts.h"
-#include "Graphics.h"
 #include "Box.h"
 #include "Damage.h"
 #include "Defence.h"
@@ -13,13 +12,13 @@ protected:
 	int minLevel;
 
 public:
-	Item(int id = 0, int price = 0, int minLevel = 0, const char *title = "", const char *description = "", 
-		const char *name = "", int size = 0, bool marked = false, int tlx = -1, int tly = -1);
+	Item(int id = -1, int price = 0, int minLevel = 0, const char *title = "", const char *description = "", 
+		const char *name = "", int size = DEF_ITEM_SIZE, bool marked = false, int tlx = -1, int tly = -1);
 	Item(const Item&) = delete;
 	virtual ~Item();
 
-	virtual Damage getDamage()const = 0;
-	virtual Defence getDefence()const = 0;
+	virtual Damage getDamageStats()const = 0;
+	virtual Defence getDefenceStats()const = 0;
 
 	int getID()const;
 	int getPrice()const;

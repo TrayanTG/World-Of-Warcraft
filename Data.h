@@ -1,7 +1,5 @@
 #pragma once
 #include "HeadersAndConsts.h"
-#include "Engine.h"
-#include "Graphics.h"
 #include "Weapon.h"
 #include "Armor.h"
 #include "Ability.h"
@@ -23,6 +21,12 @@ public:
 
 	std::vector<Item*> items;
 	std::vector<Ability*> abilities;
+
+	Item *getItemByID(int id);
+	Ability *getAbilityByID(int id);
+	Weapon emptyWeapon;
+	Armor emptyArmor;
+	Ability emptyAbility;
 
 	void loadItems(const char *directory = "Data/Items/");
 	void loadAbilities(const char *directory = "Data/Abilities/");

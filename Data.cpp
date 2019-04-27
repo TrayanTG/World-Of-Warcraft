@@ -19,6 +19,30 @@ Data& Data::getIstance()
 
 // --------------------------------------------------------------------------------
 
+Item *Data::getItemByID(int id)
+{
+	for (size_t i = 0;i < items.size();i++)
+	{
+		if (items[i]->getID() == id)
+		{
+			return items[i];
+		}
+	}
+	return nullptr;
+}
+
+Ability *Data::getAbilityByID(int id)
+{
+	for (size_t i = 0;i < abilities.size();i++)
+	{
+		if (abilities[i]->getID() == id)
+		{
+			return abilities[i];
+		}
+	}
+	return nullptr;
+}
+
 void Data::addItem(std::ifstream &iFile)
 {
 	int t;iFile >> t;

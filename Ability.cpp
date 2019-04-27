@@ -1,4 +1,5 @@
 #include "Ability.h"
+#include "Graphics.h"
 
 Ability::Ability(int id, int cd, int minPower, int maxPower, int minLevel, int resReq, const char *title, const char *description,
 	const char *name, int size, bool marked, int tlx, int tly):
@@ -92,19 +93,30 @@ bool Ability::reduceCD(int ms)
 bool Ability::showBox(const Damage &damage)const
 {
 	if (Box::showBox() == false)return false;
-	int physical = (100 + (minPower + maxPower) / 2) * damage.Physical / 100;
-	int magical = (100 + (minPower + maxPower) / 2) * damage.Magical / 100;
-	Graphics::getInstance().setcolor(LightRed);
-	std::cout << physical;
-	if (physical < 10)std::cout << ' ';
-	if (physical < 100)std::cout << ' ';
-	std::cout << ' ';
-	if (magical < 10)std::cout << ' ';
-	if (magical < 100)std::cout << ' ';
-	Graphics::getInstance().setcolor(LightBlue);
-	std::cout << magical;
-	Graphics::getInstance().setcolor(White);
-	showCD();
+	if (id >= 0)
+	{
+		int physical = (100 + (minPower + maxPower) / 2) * damage.Physical / 100;
+		int magical = (100 + (minPower + maxPower) / 2) * damage.Magical / 100;
+		Graphics::getInstance().setcolor(LightRed);
+		std::cout << physical;
+		if (physical < 10)std::cout << ' ';
+		if (physical < 100)std::cout << ' ';
+		std::cout << ' ';
+		if (magical < 10)std::cout << ' ';
+		if (magical < 100)std::cout << ' ';
+		Graphics::getInstance().setcolor(LightBlue);
+		std::cout << magical;
+		Graphics::getInstance().setcolor(White);
+		showCD();
+	}
+	else
+	{
+		//Graphics::getInstance().drawBoarder(tlx, tly, tlx + DEF_ABILITY_SIZE * 2, tly + DEF_ABILITY_SIZE);
+		Graphics::getInstance().gotoxy(tlx + 1, tly + 1);for (int i = 0;i < 2 * DEF_ABILITY_SIZE - 1;i++)std::cout << 'X';
+		Graphics::getInstance().gotoxy(tlx + 1, tly + 2);for (int i = 0;i < 2 * DEF_ABILITY_SIZE - 1;i++)std::cout << 'X';
+		Graphics::getInstance().gotoxy(tlx + 1, tly + 3);for (int i = 0;i < 2 * DEF_ABILITY_SIZE - 1;i++)std::cout << 'X';
+
+	}
 	return true;
 }
 

@@ -1,4 +1,5 @@
 #include "Weapon.h"
+#include "Graphics.h"
 
 Weapon::Weapon(int id, int price, int minLevel, const Damage &damage, WeaponType weaponType, const char *title, 
 	const char *description, const char *name, int size, bool marked, int tlx, int tly) :
@@ -22,8 +23,9 @@ Weapon::Weapon(std::ifstream &iFile)
 	iFile >> id >> price >> minLevel;
 	iFile >> damage.Physical >> damage.Magical;
 	iFile >> wType;
-	if (strcmp(wType, "Axe")) weaponType = Axe;
-	else if (strcmp(wType, "Staff")) weaponType = Staff;
+	if (!strcmp(wType, "Axe")) weaponType = Axe;
+	else if (!strcmp(wType, "Staff")) weaponType = Staff;
+	else weaponType = uWeaponType;
 	iFile >> title;
 	iFile.get();
 	iFile.getline(description, MAX_DESCRIPTION_LENGHT);
@@ -46,12 +48,17 @@ bool Weapon::showBox()const
 	return true;
 }
 
-Damage Weapon::getDamage()const
+Damage Weapon::getDamageStats()const
 {
 	return damage;
 }
 
-Defence Weapon::getDefence()const
+Defence Weapon::getDefenceStats()const
 {
 	return { 0,0 };
+}
+
+WeaponType Weapon::getWeaponType()const
+{
+	return weaponType;
 }

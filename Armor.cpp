@@ -1,4 +1,5 @@
 #include "Armor.h"
+#include "Graphics.h"
 
 Armor::Armor(int id, int price, int minLevel, const Defence &defence, ArmorType armorType, const char *title, const char *description, const char *name, int size, bool marked, int tlx, int tly) :
 	Item(id, price, minLevel, title, description, name, size, marked, tlx, tly), defence(defence), armorType(armorType)
@@ -21,12 +22,13 @@ Armor::Armor(std::ifstream &iFile)
 	iFile >> id >> price >> minLevel;
 	iFile >> defence.Armor >> defence.MagicResist >> defence.Health;
 	iFile >> aType;
-	if (strcmp(aType, "Helmet")) armorType = Helmet;
-	else if (strcmp(aType, "Shoulders")) armorType = Shoulders;
-	else if (strcmp(aType, "Chest")) armorType = Chest;
-	else if (strcmp(aType, "Gloves")) armorType = Gloves;
-	else if (strcmp(aType, "Legs")) armorType = Legs;
-	else if (strcmp(aType, "Feet")) armorType = Feet;
+	if (!strcmp(aType, "Helmet")) armorType = Helmet;
+	else if (!strcmp(aType, "Shoulders")) armorType = Shoulders;
+	else if (!strcmp(aType, "Chest")) armorType = Chest;
+	else if (!strcmp(aType, "Gloves")) armorType = Gloves;
+	else if (!strcmp(aType, "Legs")) armorType = Legs;
+	else if (!strcmp(aType, "Feet")) armorType = Feet;
+	else armorType = uArmorType;
 
 	iFile >> title;
 	iFile.get();
@@ -39,22 +41,35 @@ Armor::Armor(std::ifstream &iFile)
 bool Armor::showBox()const
 {
 	if (Box::showBox() == false)return false;
-	Graphics::getInstance().setcolor(LightRed);
-	std::cout << defence.Armor;
-	if (defence.Armor < 10)std::cout << ' ';
-	std::cout << ' ';
-	if (defence.MagicResist < 10)std::cout << ' ';
-	Graphics::getInstance().setcolor(LightBlue);
-	std::cout << defence.MagicResist;
-	Graphics::getInstance().setcolor(White);
+	if (id >= 0)
+	{
+		Graphics::getInstance().setcolor(LightRed);
+		std::cout << defence.Armor;
+		if (defence.Armor < 10)std::cout << ' ';
+		std::cout << ' ';
+		if (defence.MagicResist < 10)std::cout << ' ';
+		Graphics::getInstance().setcolor(LightBlue);
+		std::cout << defence.MagicResist;
+		Graphics::getInstance().setcolor(White);
+	}
+	else
+	{
+		Graphics::getInstance().gotoxy(tlx + 1, tly + 1);for (int i = 0;i < 2*DEF_ITEM_SIZE-1;i++)std::cout << 'X';
+		Graphics::getInstance().gotoxy(tlx + 1, tly + 2);for (int i = 0;i < 2*DEF_ITEM_SIZE-1;i++)std::cout << 'X';
+	}
 	return true;
 }
-Damage Armor::getDamage()const
+Damage Armor::getDamageStats()const
 {
 	return { 0,0 };
 }
 
-Defence Armor::getDefence()const
+Defence Armor::getDefenceStats()const
 {
 	return defence;
+}
+
+ArmorType Armor::getArmorType()const
+{
+	return armorType;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HeadersAndConsts.h"
+#include "Graphics.h"
 
 class Engine
 {
