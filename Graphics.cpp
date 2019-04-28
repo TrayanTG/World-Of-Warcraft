@@ -226,7 +226,7 @@ bool Graphics::drawPlayerUI(const Player &player, int tlx, int tly)
 bool Graphics::drawPlayer(const Player &player, int tlx, int tly)
 {
 	if (tlx < 0 || tly < 0 || tlx + DEF_CHARACTER_WIDTH >= DEF_CONSOLE_WIDTH || tly + DEF_CHARACTER_HEIGHT >= DEF_CONSOLE_HEIGHT) return false;
-	bool hasWeapon = (player.weapon != nullptr);
+	bool hasWeapon = (player.weapon->getID() >= 0);
 	if (!hasWeapon)
 	{
 		drawHelmet(player.helmet, tlx + 14, tly + 2);

@@ -14,7 +14,7 @@ Armor::Armor(std::ifstream &iFile)
 	int minLevel;
 	Defence defence;
 	ArmorType armorType;
-	char aType[MAX_WEAPONTYPE_LENGHT];
+	char aType[MAX_ARMORTYPE_LENGHT];
 	char title[MAX_INFOBOX_WIDTH - 2];
 	char description[MAX_DESCRIPTION_LENGHT];
 	char name[DEF_ITEM_SIZE * 2];
@@ -30,7 +30,7 @@ Armor::Armor(std::ifstream &iFile)
 	else if (!strcmp(aType, "Feet")) armorType = Feet;
 	else armorType = uArmorType;
 
-	iFile >> title;
+	iFile >> title;//std::cout << title << std::endl;
 	iFile.get();
 	iFile.getline(description, MAX_DESCRIPTION_LENGHT);
 	iFile.getline(name, DEF_ITEM_SIZE * 2);

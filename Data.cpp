@@ -45,16 +45,17 @@ Ability *Data::getAbilityByID(int id)
 
 void Data::addItem(std::ifstream &iFile)
 {
-	int t;iFile >> t;
+	char type[MAX_NAME_LENGHT];
+	iFile >> type;
 	Item *temp;
-	if (t == 0)
+	if (!strcmp(type,"Weapon"))
 	{
 		//std::cout << "good\n";
 		temp = new Weapon(iFile);
 		items.push_back(temp);
 		//delete[] temp; - dont delete! Using move constructor.....
 	}
-	else if (t == 1)
+	else if (!strcmp(type,"Armor"))
 	{
 		temp = new Armor(iFile);
 		items.push_back(temp);

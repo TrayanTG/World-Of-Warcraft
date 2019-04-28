@@ -37,14 +37,22 @@ Weapon::Weapon(std::ifstream &iFile)
 bool Weapon::showBox()const
 {
 	if (Box::showBox() == false)return false;
-	Graphics::getInstance().setcolor(LightRed);
-	std::cout << damage.Physical;
-	if (damage.Physical < 10)std::cout << ' ';
-	std::cout << ' ';
-	if (damage.Magical < 10)std::cout << ' ';
-	Graphics::getInstance().setcolor(LightBlue);
-	std::cout << damage.Magical;
-	Graphics::getInstance().setcolor(White);
+	if (id >= 0)
+	{
+		Graphics::getInstance().setcolor(LightRed);
+		std::cout << damage.Physical;
+		if (damage.Physical < 10)std::cout << ' ';
+		std::cout << ' ';
+		if (damage.Magical < 10)std::cout << ' ';
+		Graphics::getInstance().setcolor(LightBlue);
+		std::cout << damage.Magical;
+		Graphics::getInstance().setcolor(White);
+	}
+	else
+	{
+		Graphics::getInstance().gotoxy(tlx + 1, tly + 1);for (int i = 0;i < 2 * DEF_ITEM_SIZE - 1;i++)std::cout << 'X';
+		Graphics::getInstance().gotoxy(tlx + 1, tly + 2);for (int i = 0;i < 2 * DEF_ITEM_SIZE - 1;i++)std::cout << 'X';
+	}
 	return true;
 }
 

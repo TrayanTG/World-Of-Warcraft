@@ -1,6 +1,6 @@
 #include "Player.h"
 
-Player::Player() : Character()
+Player::Player(int gold) : Character(), gold(gold)
 {
 	helmet = shoulders = chest = gloves = legs = feet = &Data::getIstance().emptyArmor;
 	weapon = &Data::getIstance().emptyWeapon;
@@ -8,7 +8,6 @@ Player::Player() : Character()
 	eqAbilities[1] = &Data::getIstance().emptyAbility;
 	eqAbilities[2] = &Data::getIstance().emptyAbility;
 	eqAbilities[3] = &Data::getIstance().emptyAbility;
-
 }
 
 bool Player::equipHelmet(Item *eqHelmet)
@@ -81,8 +80,9 @@ bool Player::loadPlayer(const char *directory)
 	if (!iFile)return false;
 	while (iFile)
 	{
-		iFile >> temp;
-		if (iFile && !buyItem(Data::getIstance().getItemByID(temp)))return false;
+		
+		iFile >> temp;//std::cout << temp << std::endl;
+		if (iFile && !buyItem(Data::getIstance().getItemByID(temp), true))return false;
 	}
 	iFile.close();
 	path[strlen(directory)] = 0;
@@ -120,40 +120,65 @@ bool Player::savePlayer(const char *directory)
 	strcpy(path, directory);
 	std::ofstream oFile(strcat(path, "Abilities"));
 	if (!oFile) return false;
-	for (size_t i = 0;i < abilities.size();i++)oFile << abilities[i]->getID() << '\n';
+	for (size_t i = 0;i < abilities.size();i++)
+	{
+		if (abilities[i]->getID() >= 0)
+		{
+			oFile << abilities[i]->getID() << '\n';
+		}
+	}
 	oFile.close();
 	path[strlen(directory)] = 0;
 	oFile.open(strcat(path, "Items"));
 	if (!oFile)return false;
-	for (size_t i = 0; i < items.size();i++)oFile << items[i]->getID() << '\n';
+	for (size_t i = 0; i < items.size();i++)
+	{
+
+		if (items[i]->getID() >= 0)
+		{
+			oFile << items[i]->getID() << '\n';
+		}
+	}
 	oFile.close();
 	path[strlen(directory)] = 0;
 	oFile.open(strcat(path, "EquippedItems"));
 	if (!oFile) return false;
-	if (weapon != nullptr) oFile << weapon->getID() << '\n';
-	if (helmet != nullptr) oFile << helmet->getID() << '\n';
-	if (shoulders != nullptr) oFile << shoulders->getID() << '\n';
-	if (chest != nullptr) oFile << chest->getID() << '\n';
-	if (gloves != nullptr) oFile << gloves->getID() << '\n';
-	if (legs != nullptr) oFile << legs->getID() << '\n';
-	if (feet != nullptr) oFile << feet->getID() << '\n';
+	if (weapon->getID() >= 0) oFile << weapon->getID() << '\n';
+	if (helmet->getID() >= 0) oFile << helmet->getID() << '\n';
+	if (shoulders->getID() >= 0) oFile << shoulders->getID() << '\n';
+	if (chest->getID() >= 0) oFile << chest->getID() << '\n';
+	if (gloves->getID() >= 0) oFile << gloves->getID() << '\n';
+	if (legs->getID() >= 0) oFile << legs->getID() << '\n';
+	if (feet->getID() >= 0) oFile << feet->getID() << '\n';
 	oFile.close();
 	path[strlen(directory)] = 0;
 	oFile.open(strcat(path, "EquippedAbilities"));
 	if (!oFile)return false;
-	if (eqAbilities[0] == nullptr) oFile << -1 << '\n';else oFile << eqAbilities[0]->getID() << '\n';
-	if (eqAbilities[1] == nullptr) oFile << -1 << '\n';else oFile << eqAbilities[1]->getID() << '\n';
-	if (eqAbilities[2] == nullptr) oFile << -1 << '\n';else oFile << eqAbilities[2]->getID() << '\n';
-	if (eqAbilities[3] == nullptr) oFile << -1 << '\n';else oFile << eqAbilities[3]->getID() << '\n';
+	oFile << eqAbilities[0]->getID() << '\n';
+	oFile << eqAbilities[1]->getID() << '\n';
+	oFile << eqAbilities[2]->getID() << '\n';
+	oFile << eqAbilities[3]->getID() << '\n';
 	oFile.close();
 	return true;
 }
 
-bool Player::buyItem(Item *newItem)
+int Player::getGold()const
 {
+	return gold;
+}
+
+void Player::gainGold(int gold)
+{
+	this->gold += gold;
+}
+
+bool Player::buyItem(Item *newItem, bool isFree)
+{
+	if (!isFree && gold < newItem->getPrice())return false;
 	auto it = find(items.begin(), items.end(), newItem);
 	if (it != items.end()) return false;
 	items.push_back(newItem);
+	if (!isFree)gold -= newItem->getPrice();
 	return true;
 }
 
@@ -162,6 +187,7 @@ bool Player::sellItem(Item *soldItem)
 	auto it = find(items.begin(), items.end(), soldItem);
 	if (it == items.end()) return false;
 	items.erase(it);
+	gainGold(soldItem->getPrice()/2);
 	return true;
 }
 
@@ -182,11 +208,11 @@ bool Player::equipItem(Item *eqItem)
 	switch (eqArmor->getArmorType())
 	{
 		case Helmet: return equipHelmet(eqItem); break;
-		case Shoulders: return equipHelmet(eqItem); break;
-		case Chest: return equipHelmet(eqItem); break;
-		case Gloves: return equipHelmet(eqItem); break;
-		case Legs: return equipHelmet(eqItem); break;
-		case Feet: return equipHelmet(eqItem); break;
+		case Shoulders: return equipShoulders(eqItem); break;
+		case Chest: return equipChest(eqItem); break;
+		case Gloves: return equipGloves(eqItem); break;
+		case Legs: return equipLegs(eqItem); break;
+		case Feet: return equipFeet(eqItem); break;
 	}
 	return false;
 }
@@ -200,16 +226,11 @@ bool Player::equipAbility(Ability *eqAbility, int slot)
 	return true;
 }
 
-Damage Player::getAbilityDamage(int slot)const
-{
-	int power = abilities[slot]->getPower();
-	if (power == -1)return -1;
-	return { ((power + 100)*getTotalDamageStats().Physical) / 100, ((power + 100)*getTotalDamageStats().Magical) / 100 };
-}
-
 Damage Player::dealDamage(int slot)const
 {
-	return getAbilityDamage(slot);
+	int power = eqAbilities[slot]->getPower();
+	if (power == -1)return -1;
+	return { ((power + 100)*getTotalDamageStats().Physical) / 100, ((power + 100)*getTotalDamageStats().Magical) / 100 };
 }
 
 

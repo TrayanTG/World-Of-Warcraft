@@ -11,7 +11,7 @@ Item::Item(int id, int price, int minLevel, const char *title, const char *descr
 
 Item::~Item()
 {
-	std::cout << "Item destroyed!" << std::endl;
+	//std::cout << "Item destroyed!" << std::endl;
 }
 
 int Item::getID()const

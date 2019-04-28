@@ -5,13 +5,11 @@
 #include "Armor.h"
 
 class Player : public Character
-{public:
+{public: //temporary
 	std::vector<Item*> items;
 	std::vector<Ability*> abilities;
-	Armor *helmet, *shoulders, *chest, *gloves, *legs, *feet;
-	Weapon *weapon;
-	Ability *eqAbilities[4];
-	
+	int gold;
+
 	bool equipHelmet(Item *eqHelmet);
 	bool equipShoulders(Item *eqShoulders);
 	bool equipChest(Item *eqChest);
@@ -21,21 +19,23 @@ class Player : public Character
 	bool equipWeapon(Item *eqWeapon);
 
 public:
+	Armor *helmet, *shoulders, *chest, *gloves, *legs, *feet;
+	Weapon *weapon;
+	Ability *eqAbilities[4];
 
-	Player();
+	Player(int gold = 0);
 
 	bool loadPlayer(const char *directory);
 	bool savePlayer(const char *directory);
 
-	bool buyItem(Item *newItem);
+	int getGold()const;
+	void gainGold(int gold);
+	bool buyItem(Item *newItem, bool isFree = false);
 	bool sellItem(Item *soldItem);
 	bool addAbility(Ability *newAbility);
 	bool equipItem(Item *eqItem);
 	bool equipAbility(Ability *eqAbility, int slot);
 
-	Damage getAbilityDamage(int slot)const;
-
-	
 	virtual int calcDamage(const Damage &damage)const;
 	virtual Damage dealDamage(int slot)const;
 	virtual Damage getTotalDamageStats()const;

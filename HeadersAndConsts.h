@@ -20,6 +20,7 @@ const int MAX_WEAPONTYPE_LENGHT = 8;
 const int MAX_DESCRIPTION_LENGHT = 256;
 const int MAX_LEVEL = 10;
 const int MAX_NAME_LENGHT = 16;
+const int MAX_ARMORTYPE_LENGHT = 16;
 
 const int MIN_INFOBOX_WIDTH = MAX_INFOBOX_WIDTH / 2;
 

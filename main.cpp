@@ -14,8 +14,13 @@ int main()
 	Data::getIstance().loadAbilities();
 
 	Player myPlayer;
-	myPlayer.loadPlayer("Data/Logs/Ivan/");
+	myPlayer.loadPlayer("Data/Logs/Petkan/");
 	Graphics::getInstance().drawPlayerUI(myPlayer, 5, 5);
+	//myPlayer.savePlayer("Data/Logs/Petkan/");
+
+	//myPlayer.helmet = (Armor *)Data::getIstance().getItemByID(2);
+	//myPlayer.helmet->setXY(70, 0);
+	//myPlayer.helmet->showBox();
 	
 
 	/*
