@@ -50,6 +50,7 @@ bool InfoBox::showInfoBox(int tlx, int tly, int brx, int bry)const
 	int rows = bry - tly - 2;
 	if (width < MIN_INFOBOX_WIDTH || width>MAX_INFOBOX_WIDTH)return false;
 	//int rows = getRows(width);
+	Graphics::getInstance().clearBoarder(tlx, tly, brx, bry);//tlx + width - 1, tly + rows + 2);
 	Graphics::getInstance().drawBoarder(tlx, tly, brx, bry);//tlx + width - 1, tly + rows + 2);
 	Graphics::getInstance().gotoxy(tlx + 1, tly + 1);std::cout << title;
 	int index = 0;

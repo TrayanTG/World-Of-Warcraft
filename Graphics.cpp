@@ -1,6 +1,7 @@
 #include "Graphics.h"
 
 #include "Engine.h"
+#include "Data.h"
 
 Graphics Graphics::s;
 
@@ -109,15 +110,20 @@ void Graphics::setFontSize(int size)
 	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
 }
 
+void Graphics::init()
+{
+	system("chcp 437");
+	//Engine::getInstance().initMouse();
+	setFontSize(DEF_CONSOLE_SIZE);
+	SetConsoleWindowSize(DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT);
+	clearscreen();
+}
+
 // --------------------------------------------------------------------------------
 
 Graphics::Graphics()
 {
-	system("chcp 437");
-	Engine::getInstance().init();
-	setFontSize(DEF_CONSOLE_SIZE);
-	SetConsoleWindowSize(DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT);
-	clearscreen();
+	init();
 }
 
 Graphics::~Graphics()
@@ -155,12 +161,12 @@ bool Graphics::clearBoarder(int tlx, int tly, int brx, int bry)
 	for (int i = tly;i <= bry;i++)
 	{
 		gotoxy(tlx, i);
-		for (int j = tlx;j <= brx;j++)std::cout << '.';
+		for (int j = tlx;j <= brx;j++)std::cout << ' ';
 	}
 	return true;
 }
 
-bool Graphics::drawFrame(const char *name, int level, int currHP, int maxHP, int currRes, int maxRes, Colour col, int tlx, int tly)
+bool Graphics::drawFrame(const char *name, int level, const Bar &HP, const Bar &res, Colour col, int tlx, int tly)
 {
 	if (tlx < 0 || tly < 0 || tlx + DEF_FRAME_WIDTH >= DEF_CONSOLE_WIDTH || tly + DEF_FRAME_HEIGHT >= DEF_CONSOLE_HEIGHT)return false;
 	clearBoarder(tlx, tly, tlx + DEF_FRAME_WIDTH, tly + DEF_FRAME_HEIGHT);
@@ -170,21 +176,21 @@ bool Graphics::drawFrame(const char *name, int level, int currHP, int maxHP, int
 	//-----
 	gotoxy(tlx + 1, tly + 2);
 	setcolor(LightRed);
-	std::cout << currHP << "    ";
+	std::cout << HP.Curr << "    ";
 	gotoxy(tlx + DEF_FRAME_WIDTH - 4, tly+2);
-	if (maxHP < 1000)std::cout << ' ';
-	if (maxHP < 100)std::cout << ' ';
-	if (maxHP < 10)std::cout << ' ';
-	std::cout << maxHP;
+	if (HP.Max < 1000)std::cout << ' ';
+	if (HP.Max < 100)std::cout << ' ';
+	if (HP.Max < 10)std::cout << ' ';
+	std::cout << HP.Max;
 	//-----
 	gotoxy(tlx + 1, tly + 3);
 	setcolor(col);
-	std::cout << currRes << "    ";
+	std::cout << res.Curr << "    ";
 	gotoxy(tlx + DEF_FRAME_WIDTH - 4, tly + 3);
-	if (maxRes < 1000)std::cout << ' ';
-	if (maxRes < 100)std::cout << ' ';
-	if (maxRes < 10)std::cout << ' ';
-	std::cout << maxRes;
+	if (res.Max < 1000)std::cout << ' ';
+	if (res.Max < 100)std::cout << ' ';
+	if (res.Max < 10)std::cout << ' ';
+	std::cout << res.Max;
 
 	setcolor(White);
 	return true;
@@ -249,9 +255,28 @@ bool Graphics::drawPlayer(const Player &player, int tlx, int tly)
 	return true;
 }
 
+bool Graphics::drawCharacterInfo(const Player &player, int tlx, int tly)
+{
+	if (tlx < 0 || tly < 0 || false || false)return false;
+	clearBoarder(tlx, tly, tlx + DEF_CHAR_INFO_WIDTH, tly + DEF_CHAR_INFO_HEIGH);
+	drawBoarder(tlx, tly, tlx + DEF_CHAR_INFO_WIDTH, tly + DEF_CHAR_INFO_HEIGH);
+
+	setcolor(White);
+	gotoxy(tlx+2/*tlx + (DEF_CHAR_INFO_WIDTH - strlen(player.getName())) / 2 - 2*/, tly + 1);std::cout << player.getName()<<'('<<player.getLevel()<<')';
+	if (player.getLevel() < MAX_LEVEL) { gotoxy(tlx + 2, tly + 2);std::cout << "XP: " << player.getXP();std::cout << '/' << DEF_LEVEL_EXP[player.getLevel() - 1]; }
+	gotoxy(tlx + 2, tly + 3);std::cout << "Gold: " << player.getGold();
+	gotoxy(tlx + 2, tly + 4);std::cout << "Health: " << player.getHP().Max;
+	gotoxy(tlx + 2, tly + 5);std::cout << "Physical Damage: ";setcolor(LightRed);std::cout << player.getTotalDamageStats().Physical;setcolor(White);
+	gotoxy(tlx + 2, tly + 6);std::cout << "Magical Damage: ";setcolor(LightBlue);std::cout << player.getTotalDamageStats().Magical;setcolor(White);
+	gotoxy(tlx + 2, tly + 7);std::cout << "Armor: ";setcolor(LightRed);std::cout << player.getTotalDefenceStats().Armor;setcolor(White);
+	gotoxy(tlx + 2, tly + 8);std::cout << "Magic Resist: ";setcolor(LightBlue);std::cout << player.getTotalDefenceStats().MagicResist;setcolor(White);
+
+	return true;
+}
+
 void Graphics::drawWeapon(const Weapon *weapon, int tlx, int tly)
 {
-	if (weapon->getID() < 1)setcolor(White);
+	if (weapon->getID() < 0)setcolor(White);
 	else if (weapon->getMinLevel() < 2)setcolor(Yellow);
 	else if (weapon->getMinLevel() < 4)setcolor(LightGray);
 	else if (weapon->getMinLevel() < 6)setcolor(LightYellow);
@@ -405,4 +430,64 @@ void Graphics::drawStaff(int tlx, int tly)
 	gotoxy(tlx + 0, tly + 10);std::cout << "      *";
 	gotoxy(tlx + 0, tly + 11);std::cout << "      *";
 	gotoxy(tlx + 0, tly + 12);std::cout << "      *";
+}
+
+void Graphics::drawClassChooseUI()
+{
+	setFontSize(DEF_CONSOLE_SIZE*2);
+	SetConsoleWindowSize(DEF_CONSOLE_WIDTH/2, DEF_CONSOLE_HEIGHT/2);
+	clearscreen();
+
+	gotoxy((DEF_CONSOLE_WIDTH/2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 2);std::cout << "Choose your class:";
+	gotoxy((DEF_CONSOLE_WIDTH/2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 1);std::cout << "-Warrior <W>";
+	gotoxy((DEF_CONSOLE_WIDTH/2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 0);std::cout << "-Mage <M>";
+	gotoxy((DEF_CONSOLE_WIDTH/2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 + 1);std::cout << "-Paladin <P>";
+}
+
+void Graphics::drawNewOldUI()
+{
+	clearscreen();
+	gotoxy(DEF_CONSOLE_WIDTH / 4 - 54/2, DEF_CONSOLE_HEIGHT / 4 - 1);
+	std::cout << "Start a new character or log into existing one? <N/E>";
+}
+
+void Graphics::drawEnterName()
+{
+	clearscreen();
+	Engine::getInstance().setCursorVisible(true);
+	gotoxy(DEF_CONSOLE_WIDTH / 4 - 12 / 2, DEF_CONSOLE_HEIGHT / 4 - 1);
+	std::cout << "Enter name: ";
+}
+
+void Graphics::drawHomeUI(const Player &player)
+{
+	clearBoarder(0, 0, DEF_FREE_BEG, DEF_CONSOLE_HEIGHT - 1);
+	drawPlayerUI(player, 0, 10);
+	drawCharacterInfo(player, 0, 0);
+	
+	clearBoarder(DEF_CHAR_INFO_WIDTH + 1, 0, DEF_CHAR_INFO_WIDTH + 19, DEF_CHAR_INFO_HEIGH);
+	drawBoarder(DEF_CHAR_INFO_WIDTH + 1, 0, DEF_CHAR_INFO_WIDTH + 19, DEF_CHAR_INFO_HEIGH);
+
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 1);std::cout << "Menu:";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 3);std::cout << "Play <P>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 4);std::cout << "Shop <S>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 5);std::cout << "Inventory <I>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 6);std::cout << "AbilityBook <A>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 7);std::cout << "Back <ESC>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 8);std::cout << "Exit <E>";
+}
+
+void Graphics::drawInventoryUI(const Player &player, Box **boxes, int num)
+{
+	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
+	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
+
+	Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+
+	for (int i = 0;i < num;i++)
+	{
+		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * (i % 10) * (DEF_ITEM_SIZE + 1), 10 + (i / 10) * (DEF_ITEM_SIZE + 1));
+		boxes[i]->showBox();
+	}
 }

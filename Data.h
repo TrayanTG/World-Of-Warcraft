@@ -3,6 +3,7 @@
 #include "Weapon.h"
 #include "Armor.h"
 #include "Ability.h"
+#include "Enemy.h"
 
 class Data
 {
@@ -21,15 +22,19 @@ public:
 
 	std::vector<Item*> items;
 	std::vector<Ability*> abilities;
+	std::vector<Enemy*> enemies;
 
 	Item *getItemByID(int id);
 	Ability *getAbilityByID(int id);
+	Enemy *getEnemyByID(int id);
 	Weapon emptyWeapon;
 	Armor emptyArmor;
 	Ability emptyAbility;
 
+	void loadEnemies(const char *directory = "Data/Enemies/");
 	void loadItems(const char *directory = "Data/Items/");
 	void loadAbilities(const char *directory = "Data/Abilities/");
+	void addEnemy(std::ifstream &iFile);
 	void addItem(std::ifstream &iFile);
 	void addAbility(std::ifstream &iFile);
 };

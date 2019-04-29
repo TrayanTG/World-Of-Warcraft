@@ -111,11 +111,11 @@ bool Ability::showBox(const Damage &damage)const
 	}
 	else
 	{
-		//Graphics::getInstance().drawBoarder(tlx, tly, tlx + DEF_ABILITY_SIZE * 2, tly + DEF_ABILITY_SIZE);
-		Graphics::getInstance().gotoxy(tlx + 1, tly + 1);for (int i = 0;i < 2 * DEF_ABILITY_SIZE - 1;i++)std::cout << 'X';
-		Graphics::getInstance().gotoxy(tlx + 1, tly + 2);for (int i = 0;i < 2 * DEF_ABILITY_SIZE - 1;i++)std::cout << 'X';
-		Graphics::getInstance().gotoxy(tlx + 1, tly + 3);for (int i = 0;i < 2 * DEF_ABILITY_SIZE - 1;i++)std::cout << 'X';
-
+		for (int k = 0;k < DEF_ABILITY_SIZE - 1;k++)
+		{
+			Graphics::getInstance().gotoxy(tlx + 1, tly + 1 + k);
+			for (int i = 0;i < 2 * DEF_ABILITY_SIZE - 1;i++)std::cout << 'X';
+		}
 	}
 	return true;
 }

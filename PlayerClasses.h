@@ -5,9 +5,32 @@ class Warrior: public Player
 {
 
 public:
-	Warrior();
+	Warrior(const char *name = "");
 
-	//virtual Damage dealDamage(int slot);
+	virtual bool levelUp();
+	virtual void regenRes();
+	virtual Damage dealDamage(int slot);
 };
 
-//class Mage:
+class Mage: public Player
+{
+
+public:
+	Mage(const char *name = "");
+
+	virtual bool levelUp();
+	virtual void regenRes();
+	virtual Damage dealDamage(int slot);
+};
+
+class Paladin: public Player
+{
+public:
+	Paladin(const char *name = "");
+
+	bool gainCombo();
+
+	virtual bool levelUp();
+	virtual void regenRes();
+	virtual Damage dealDamage(int slot);
+};

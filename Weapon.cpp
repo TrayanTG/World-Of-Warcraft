@@ -50,8 +50,11 @@ bool Weapon::showBox()const
 	}
 	else
 	{
-		Graphics::getInstance().gotoxy(tlx + 1, tly + 1);for (int i = 0;i < 2 * DEF_ITEM_SIZE - 1;i++)std::cout << 'X';
-		Graphics::getInstance().gotoxy(tlx + 1, tly + 2);for (int i = 0;i < 2 * DEF_ITEM_SIZE - 1;i++)std::cout << 'X';
+		for (int k = 0;k < DEF_ITEM_SIZE - 1;k++)
+		{
+			Graphics::getInstance().gotoxy(tlx + 1, tly + 1 + k);
+			for (int i = 0;i < 2 * DEF_ITEM_SIZE - 1;i++)std::cout << 'X';
+		}
 	}
 	return true;
 }

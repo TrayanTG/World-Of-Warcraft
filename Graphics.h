@@ -34,14 +34,22 @@ public:
 
 	static Graphics& getInstance();
 
+	void init();
 	void gotoxy(int x, int y);
 	void setcolor(Colour colour);
 	void clearscreen();
 
 	bool drawBoarder(int tlx, int tly, int brx, int bry);
 	bool clearBoarder(int tlx, int tly, int brx, int bry);
-	bool drawFrame(const char *name, int level, int currHP, int maxHP, int currRes, int maxRes, Colour col, int tlx, int tly);
+	bool drawFrame(const char *name, int level, const Bar &HP, const Bar &res, Colour col, int tlx, int tly);
 	bool drawPlayer(const Player &player, int tlx, int tly);
 	bool drawPlayerUI(const Player &player, int tlx, int tly);
+	bool drawCharacterInfo(const Player &player, int tlx, int tly);
+	void drawHomeUI(const Player &player);
+	void drawInventoryUI(const Player &player, Box **boxes, int num);
+
+	void drawClassChooseUI();
+	void drawNewOldUI();
+	void drawEnterName();
 
 };

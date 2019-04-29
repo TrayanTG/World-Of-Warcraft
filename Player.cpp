@@ -1,7 +1,19 @@
 #include "Player.h"
+#include "Data.h"
 
-Player::Player(int gold) : Character(), gold(gold)
+Player::Player() : Character()
 {
+	init();
+	buyItem(Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID), true);
+	equipItem(Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID));
+	addAbility(Data::getIstance().getAbilityByID(DEF_ABILITY_ID));
+	equipAbility(Data::getIstance().getAbilityByID(DEF_ABILITY_ID), DEF_ABILITY_SLOT);
+}
+
+void Player::init()
+{
+	abilities.clear();
+	items.clear();
 	helmet = shoulders = chest = gloves = legs = feet = &Data::getIstance().emptyArmor;
 	weapon = &Data::getIstance().emptyWeapon;
 	eqAbilities[0] = &Data::getIstance().emptyAbility;
@@ -63,6 +75,7 @@ bool Player::equipWeapon(Item *eqWeapon)
 
 bool Player::loadPlayer(const char *directory)
 {
+	init();
 	loadCharacter(directory);
 	int temp;
 	char path[MAX_PATH_LENGHT];
@@ -162,16 +175,6 @@ bool Player::savePlayer(const char *directory)
 	return true;
 }
 
-int Player::getGold()const
-{
-	return gold;
-}
-
-void Player::gainGold(int gold)
-{
-	this->gold += gold;
-}
-
 bool Player::buyItem(Item *newItem, bool isFree)
 {
 	if (!isFree && gold < newItem->getPrice())return false;
@@ -229,10 +232,22 @@ bool Player::equipAbility(Ability *eqAbility, int slot)
 Damage Player::dealDamage(int slot)const
 {
 	int power = eqAbilities[slot]->getPower();
-	if (power == -1)return -1;
+	if (power == -1)return { 0,0 };
 	return { ((power + 100)*getTotalDamageStats().Physical) / 100, ((power + 100)*getTotalDamageStats().Magical) / 100 };
 }
 
+bool Player::levelUp()
+{
+	if (!Character::levelUp())return false;
+	for (size_t i = 0;i < Data::getIstance().abilities.size();i++)
+	{
+		if (Data::getIstance().abilities[i]->getMinLevel() <= level)
+		{
+			addAbility(Data::getIstance().abilities[i]);
+		}
+	}
+	return true;
+}
 
 int Player::calcDamage(const Damage &damage)const
 {

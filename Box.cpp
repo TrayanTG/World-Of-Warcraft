@@ -35,7 +35,6 @@ int Box::getQuadrant()const
 	if (tlx < 0 || tly < 0)return 0;
 	int x = tlx + size;
 	int y = tly + size / 2;
-	//std::cout << x << ' ' << y << std::endl;
 	if (x >= DEF_CONSOLE_WIDTH / 2 && y <= DEF_CONSOLE_HEIGHT / 2)return 1;
 	if (x <= DEF_CONSOLE_WIDTH / 2 && y <= DEF_CONSOLE_HEIGHT / 2)return 2;
 	if (x <= DEF_CONSOLE_WIDTH / 2) return 3;
@@ -62,7 +61,7 @@ bool Box::setMarked(bool marked)
 
 bool Box::setXY(int x, int y)
 {
-	if (x < 0 || y < 0 || x >= DEF_CONSOLE_WIDTH - 2 * size || y >= DEF_CONSOLE_HEIGHT - size - 2)return false;
+	if (x < 0 || y < 0 || x >= DEF_CONSOLE_WIDTH - 2 * size  || y >= DEF_CONSOLE_HEIGHT - size)return false;
 	//std::cout << "here: " << name << std::endl;
 	tlx = x;
 	tly = y;
