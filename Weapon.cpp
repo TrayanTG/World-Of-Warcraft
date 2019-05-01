@@ -40,12 +40,12 @@ bool Weapon::showBox(const Damage &damage)const
 	if (id >= 0)
 	{
 		Graphics::getInstance().setcolor(LightRed);
-		std::cout << damage.Physical;
-		if (damage.Physical < 10)std::cout << ' ';
+		std::cout << this->damage.Physical;
+		if (this->damage.Physical < 10)std::cout << ' ';
 		std::cout << ' ';
-		if (damage.Magical < 10)std::cout << ' ';
+		if (this->damage.Magical < 10)std::cout << ' ';
 		Graphics::getInstance().setcolor(LightBlue);
-		std::cout << damage.Magical;
+		std::cout << this->damage.Magical;
 		Graphics::getInstance().setcolor(White);
 	}
 	else

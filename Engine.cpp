@@ -8,6 +8,7 @@ Engine Engine::s;
 
 Engine::Engine()
 {
+	cheatOn = false;
 	Data::getIstance().loadItems();
 	Data::getIstance().loadAbilities();
 	Data::getIstance().loadEnemies();
@@ -40,6 +41,8 @@ void Engine::initMouse()
 
 void Engine::initHome(Box **boxes, int &cntBoxes, int &currBox)
 {
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
+
 	cntBoxes = 0;
 	currBox = -1;
 	for (int i = 0;i < 4;i++)
@@ -62,6 +65,8 @@ void Engine::initInventory(Box **boxes, Button &equipItem, Button &sellItem, int
 {
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
+
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
 
 	cntBoxes = 0;
 	currBox = invBoxes = markedBox = -1;
@@ -106,6 +111,8 @@ void Engine::initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox,
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
+
 	cntBoxes = 0;
 	currBox = invBoxes = markedBox = -1;
 
@@ -146,6 +153,8 @@ void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Butto
 	int totalLenX = 6 * (DEF_ABILITY_SIZE + 1);
 	int totalLenY = 3 * (DEF_ABILITY_SIZE + 1);
 
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
+
 	cntBoxes = 0;
 	currBox = invBoxes = markedBox = -1;
 
@@ -175,11 +184,6 @@ void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Butto
 		if (f) boxes[cntBoxes++] = myPlayer->abilities[i];
 	}
 
-	//((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2
-	//(DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1
-	//((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2
-	//(DEF_CONSOLE_HEIGHT + totalLenY) / 2
-
 	eqSlot1.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4);
 	eqSlot2.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4);
 	eqSlot3.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
@@ -187,10 +191,8 @@ void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Butto
 
 	for (int i = 0;i < cntBoxes - invBoxes;i++)
 	{
-		//std::cout << "NICE";
 		boxes[i+invBoxes]->setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + 1 + 2 * (i % 3) * (DEF_ABILITY_SIZE + 1), (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 5 + (i / 3)*(DEF_ABILITY_SIZE + 1));
-		//boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1));
-	}//system("pause");
+	}
 }
 
 void Engine::setCursorVisible(bool isVisible)
@@ -236,12 +238,14 @@ void Engine::updateCursor()
 void Engine::logIn()
 {
 	char chooseClass, chooseNewExist, name[MAX_NAME_LENGHT];
+	bool cheatTemp = false;
 // ---------------------------------------------
 	Graphics::getInstance().drawClassChooseUI();
 	do
 	{
 		chooseClass = _getch();
 		if (chooseClass >= 'a')chooseClass -= ('a' - 'A');
+		if (chooseClass == 'C') cheatTemp = true;
 	} while (chooseClass != 'W' && chooseClass != 'M' && chooseClass != 'P');
 // ---------------------------------------------
 	Graphics::getInstance().drawNewOldUI();
@@ -249,6 +253,7 @@ void Engine::logIn()
 	{
 		chooseNewExist = _getch();
 		if (chooseNewExist >= 'a')chooseNewExist -= ('a' - 'A');
+		if (cheatTemp && chooseNewExist == 'H') cheatOn = true;
 	} while (chooseNewExist != 'N' && chooseNewExist != 'E');
 // ---------------------------------------------
 	Graphics::getInstance().drawEnterName();
@@ -292,7 +297,7 @@ void Engine::Home()
 {
 	char t = 0;
 	Box *boxes[16];
-	int cntBoxes, currBox;
+	int cntBoxes = 0, currBox = -1;
 	
 	initHome(boxes, cntBoxes, currBox);
 	
@@ -373,6 +378,7 @@ void Engine::Inventory()
 				{
 					if (boxes[i]->isWithin(coord.X, coord.Y))
 					{
+						for (int i = invBoxes;i < cntBoxes;i++) boxes[i]->setMarked(false);
 						markedBox = i;
 						boxes[markedBox]->setMarked(true);
 						Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
@@ -407,6 +413,7 @@ void Engine::Inventory()
 				}
 				else if (boxes[markedBox]->isWithin(coord.X, coord.Y))
 				{
+					boxes[markedBox]->showBox();
 					markedBox = -1;
 				}
 				else
@@ -415,6 +422,7 @@ void Engine::Inventory()
 					{
 						if (boxes[i]->isWithin(coord.X, coord.Y))
 						{
+							for (int i = invBoxes;i < cntBoxes;i++) boxes[i]->setMarked(false);
 							markedBox = i;
 							boxes[markedBox]->setMarked(true);
 							Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
@@ -479,7 +487,7 @@ void Engine::Shop()
 	char t = 0;
 	Box *boxes[128];
 	Button buyItem("   Buy   ");
-	int cntBoxes, currBox, invBoxes, markedBox;
+	int cntBoxes = 0, currBox = -1, invBoxes = -1, markedBox = -1;
 
 	initShop(boxes, buyItem, cntBoxes, currBox, invBoxes, markedBox);
 
@@ -499,7 +507,8 @@ void Engine::Shop()
 				{
 					if (boxes[i]->isWithin(coord.X, coord.Y))
 					{
-						markedBox = i;
+						for (int i = invBoxes;i < cntBoxes;i++) boxes[i]->setMarked(false);
+						currBox = markedBox = i;
 						boxes[markedBox]->setMarked(true);
 						Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
 						boxes[markedBox]->toggleInfoBox();
@@ -520,6 +529,7 @@ void Engine::Shop()
 				}
 				else if (boxes[markedBox]->isWithin(coord.X, coord.Y))
 				{
+					boxes[markedBox]->showBox();
 					markedBox = -1;
 				}
 				else
@@ -528,6 +538,7 @@ void Engine::Shop()
 					{
 						if (boxes[i]->isWithin(coord.X, coord.Y))
 						{
+							for (int i = invBoxes;i < cntBoxes;i++) boxes[i]->setMarked(false);
 							markedBox = i;
 							boxes[markedBox]->setMarked(true);
 							Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
@@ -540,11 +551,13 @@ void Engine::Shop()
 		if (tp > std::chrono::steady_clock::now())continue;
 		tp = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 		myPlayer->savePlayer(directory);
-
+		
 		if (InputRecord.EventType == KEY_EVENT)
 		{
 			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
 			{
+			case 'L': if(cheatOn) myPlayer->gainXP(10); break;
+			case 'M': if(cheatOn) myPlayer->gainGold(10); break;
 			case 'H': t = 'H'; break;
 			case 'I': t = 'I'; break;
 			case 'P': t = 'P'; break;
@@ -593,20 +606,142 @@ void Engine::AbilityBook()
 	Button eqSlot2("Equip slot2");
 	Button eqSlot3("Equip slot3");
 	Button eqSlot4("Equip slot4");
-	int cntBoxes, currBox, invBoxes, markedBox;
+	int cntBoxes = 0, currBox = -1, invBoxes = -1, markedBox = -1;
 
 	initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
 
+	std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now();
 	Graphics::getInstance().clearscreen();
 	Graphics::getInstance().drawHomeUI(*myPlayer);
 	Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
 
-	//boxes[cntBoxes - 1]->toggleInfoBox();
-
-	//std::cout << myPlayer->abilities.size() << ' ' << cntBoxes;system("pause");
-
 	while (true)
 	{
+		if (InputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+		{
+			if (markedBox == -1)
+			{
+				for (int i = invBoxes;i < cntBoxes;i++)
+				{
+					if (boxes[i]->isWithin(coord.X, coord.Y))
+					{
+						for (int i = invBoxes;i < cntBoxes;i++) boxes[i]->setMarked(false);
+						markedBox = i;
+						boxes[markedBox]->setMarked(true);
+						Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+						boxes[markedBox]->toggleInfoBox();
+					}
+				}
+			}
+			else
+			{
+				boxes[markedBox]->setMarked(false);
+				if (eqSlot1.isWithin(coord.X, coord.Y))
+				{
+					myPlayer->equipAbility((Ability*)boxes[markedBox], 0);
+					initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
+					Graphics::getInstance().clearscreen();
+					Graphics::getInstance().drawHomeUI(*myPlayer);
+					Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+					markedBox = -1;
+				}
+				else if (eqSlot2.isWithin(coord.X, coord.Y))
+				{
+					myPlayer->equipAbility((Ability*)boxes[markedBox], 1);
+					initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
+					Graphics::getInstance().clearscreen();
+					Graphics::getInstance().drawHomeUI(*myPlayer);
+					Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+					markedBox = -1;
+				}
+				else if (eqSlot3.isWithin(coord.X, coord.Y))
+				{
+					myPlayer->equipAbility((Ability*)boxes[markedBox], 2);
+					initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
+					Graphics::getInstance().clearscreen();
+					Graphics::getInstance().drawHomeUI(*myPlayer);
+					Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+					markedBox = -1;
+				}
+				else if (eqSlot4.isWithin(coord.X, coord.Y))
+				{
+					myPlayer->equipAbility((Ability*)boxes[markedBox], 3);
+					initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
+					Graphics::getInstance().clearscreen();
+					Graphics::getInstance().drawHomeUI(*myPlayer);
+					Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+					markedBox = -1;
+				}
+				else if (boxes[markedBox]->isWithin(coord.X, coord.Y))
+				{
+					boxes[markedBox]->showBox(myPlayer->getTotalDamageStats());
+					markedBox = -1;
+				}
+				else
+				{
+					for (int i = invBoxes;i < cntBoxes;i++)
+					{
+						if (boxes[i]->isWithin(coord.X, coord.Y))
+						{
+							for (int i = invBoxes;i < cntBoxes;i++) boxes[i]->setMarked(false);
+							markedBox = i;
+							boxes[markedBox]->setMarked(true);
+							Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+							boxes[markedBox]->toggleInfoBox();
+						}
+					}
+				}
+			}
+		}
+		if (tp > std::chrono::steady_clock::now())continue;
+		tp = std::chrono::steady_clock::now() + std::chrono::milliseconds(25);
+		myPlayer->savePlayer(directory);
 
+		if (InputRecord.EventType == KEY_EVENT)
+		{
+			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
+			{
+			case 'S': t = 'S'; break;
+			case 'H': t = 'H'; break;
+			case 'P': t = 'P'; break;
+			case 'I': t = 'I'; break;
+			case 'E': exit(0);
+			}
+			if (t)break;
+		}
+		else if (InputRecord.EventType == MOUSE_EVENT)
+		{
+			if (currBox == -1)
+			{
+				for (int i = 0;i < cntBoxes;i++)
+				{
+					if (boxes[i]->isWithin(coord.X, coord.Y))
+					{
+						boxes[i]->toggleInfoBox();
+						currBox = i;
+					}
+				}
+			}
+			else
+			{
+				if (!boxes[currBox]->isWithin(coord.X, coord.Y))
+				{
+					boxes[currBox]->hideInfoBox();
+					if (currBox < invBoxes) Graphics::getInstance().drawHomeUI(*myPlayer);
+					else Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+					currBox = -1;
+				}
+			}
+		}
 	}
+
+	eqSlot1.setXY(-1, -1);
+	eqSlot2.setXY(-1, -1);
+	eqSlot3.setXY(-1, -1);
+	eqSlot4.setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	if (t == 'H')Home();
+	if (t == 'S')Shop();
+	if (t == 'I')Inventory();
 }

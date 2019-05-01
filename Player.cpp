@@ -149,7 +149,21 @@ bool Player::loadPlayer(const char *directory)
 bool Player::savePlayer(const char *directory)
 {
 	//_mkdir(directory);
+	damage -= weapon->getDamageStats();
+	defence -= helmet->getDefenceStats();
+	defence -= chest->getDefenceStats();
+	defence -= shoulders->getDefenceStats();
+	defence -= gloves->getDefenceStats();
+	defence -= legs->getDefenceStats();
+	defence -= feet->getDefenceStats();
 	saveCharacter(directory);
+	damage += weapon->getDamageStats();
+	defence += helmet->getDefenceStats();
+	defence += chest->getDefenceStats();
+	defence += shoulders->getDefenceStats();
+	defence += gloves->getDefenceStats();
+	defence += legs->getDefenceStats();
+	defence += feet->getDefenceStats();
 	char path[MAX_PATH_LENGHT];
 	strcpy(path, directory);
 	std::ofstream oFile(strcat(path, "Abilities"));

@@ -494,7 +494,8 @@ void Graphics::drawInventoryUI(const Player &player, Box **boxes, int num, Butto
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	//Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	Graphics::getInstance().clearBoarder(DEF_FREE_BEG, 0, DEF_CONSOLE_WIDTH - 1, DEF_CONSOLE_HEIGHT - 1);
 	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
 	equipItem.showButton();
 	sellItem.showButton();
@@ -506,7 +507,8 @@ void Graphics::drawShopUI(const Player &player, Box **boxes, int num, Button &bu
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	//Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	Graphics::getInstance().clearBoarder(DEF_FREE_BEG, 0, DEF_CONSOLE_WIDTH - 1, DEF_CONSOLE_HEIGHT - 1);
 	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
 	buyItem.showButton();
 	for (int i = 0;i < num;i++) boxes[i]->showBox();
@@ -517,7 +519,8 @@ void Graphics::drawAbilityBookUI(const Player &player, Box **boxes, int num, But
 	int totalLenX = 6 * (DEF_ABILITY_SIZE + 1);
 	int totalLenY = 3 * (DEF_ABILITY_SIZE + 1);
 
-	Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
+	//Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
+	Graphics::getInstance().clearBoarder(DEF_FREE_BEG, 0, DEF_CONSOLE_WIDTH - 1, DEF_CONSOLE_HEIGHT - 1);
 	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
 	eqSlot1.showButton();
 	eqSlot2.showButton();

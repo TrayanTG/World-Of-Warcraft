@@ -6,6 +6,8 @@ Warrior::Warrior(const char *name): Player()
 	buyItem(Data::getIstance().getItemByID(DEF_WARRIOR_WEAPON_ID), true);
 	equipItem(Data::getIstance().getItemByID(DEF_WARRIOR_WEAPON_ID));
 	setCharacter(DEF_WARRIOR_STARTER_DAMAGE, DEF_WARRIOR_STARTER_DEFENCE, name, DEF_STARTER_HP, DEF_WARRIOR_STARTER_RES, 1, 0);
+	damage += Data::getIstance().getItemByID(DEF_WARRIOR_WEAPON_ID)->getDamageStats();
+	defence += Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID)->getDefenceStats();
 }
 
 bool Warrior::levelUp()
@@ -34,6 +36,8 @@ Mage::Mage(const char *name) : Player()
 	buyItem(Data::getIstance().getItemByID(DEF_MAGE_WEAPON_ID), true);
 	equipItem(Data::getIstance().getItemByID(DEF_MAGE_WEAPON_ID));
 	setCharacter(DEF_MAGE_STARTER_DAMAGE, DEF_MAGE_STARTER_DEFENCE, name, DEF_STARTER_HP, DEF_MAGE_STARTER_RES, 1, 0);
+	damage += Data::getIstance().getItemByID(DEF_MAGE_WEAPON_ID)->getDamageStats();
+	defence += Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID)->getDefenceStats();
 }
 
 bool Mage::levelUp()
@@ -62,6 +66,8 @@ Paladin::Paladin(const char *name)
 	buyItem(Data::getIstance().getItemByID(DEF_PALADIN_WEAPON_ID), true);
 	equipItem(Data::getIstance().getItemByID(DEF_PALADIN_WEAPON_ID));
 	setCharacter(DEF_PALADIN_STARTER_DAMAGE, DEF_PALADIN_STARTER_DEFENCE, name, DEF_STARTER_HP, DEF_PALADIN_STARTER_RES, 1, 0);
+	damage += Data::getIstance().getItemByID(DEF_PALADIN_WEAPON_ID)->getDamageStats();
+	defence += Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID)->getDefenceStats();
 }
 
 bool Paladin::levelUp()
