@@ -32,9 +32,12 @@ public:
 	void initMouse();
 	void setCursorVisible(bool isVisible);
 
+	void initHome(Box **boxes, int &cntBoxes, int &currBox);
+	void initInventory(Box **boxes, Button &equipItem, Button &sellItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
+	void initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
+
 	void logIn();
-
-
 	void Home();
 	void Inventory();
+	void Shop();
 };

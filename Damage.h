@@ -11,4 +11,10 @@ struct Damage
 		Magical += other.Magical;
 		return *this;
 	}
+	Damage& operator -= (const Damage &other)
+	{
+		Physical -= other.Physical;
+		Magical -= other.Magical;
+		return *this;
+	}
 };

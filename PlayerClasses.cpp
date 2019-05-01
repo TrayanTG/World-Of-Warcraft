@@ -11,8 +11,9 @@ Warrior::Warrior(const char *name): Player()
 bool Warrior::levelUp()
 {
 	if (!Player::levelUp())return false;
-	baseDamage += DEF_WARRIOR_LEVELUP_DAMAGE;
-	baseDefence += DEF_WARRIOR_LEVELUP_DEFENCE;
+	damage += DEF_WARRIOR_LEVELUP_DAMAGE;
+	defence += DEF_WARRIOR_LEVELUP_DEFENCE;
+	transferDefenceToHP();
 	return true;
 }
 
@@ -38,8 +39,9 @@ Mage::Mage(const char *name) : Player()
 bool Mage::levelUp()
 {
 	if (!Player::levelUp())return false;
-	baseDamage += DEF_MAGE_LEVELUP_DAMAGE;
-	baseDefence += DEF_MAGE_LEVELUP_DEFENCE;
+	damage += DEF_MAGE_LEVELUP_DAMAGE;
+	defence += DEF_MAGE_LEVELUP_DEFENCE;
+	transferDefenceToHP();
 	return true;
 }
 
@@ -65,8 +67,9 @@ Paladin::Paladin(const char *name)
 bool Paladin::levelUp()
 {
 	if (!Player::levelUp())return false;
-	baseDamage += DEF_PALADIN_LEVELUP_DAMAGE;
-	baseDefence += DEF_PALADIN_LEVELUP_DEFENCE;
+	damage += DEF_PALADIN_LEVELUP_DAMAGE;
+	defence += DEF_PALADIN_LEVELUP_DEFENCE;
+	transferDefenceToHP();
 	return true;
 }
 

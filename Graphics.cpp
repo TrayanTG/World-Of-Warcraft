@@ -166,6 +166,18 @@ bool Graphics::clearBoarder(int tlx, int tly, int brx, int bry)
 	return true;
 }
 
+bool Graphics::drawButton(const Button &button)
+{
+	if (button.getTLX() < 0 || button.getTLY() < 0 || button.getTLX() + button.getLen() + 3 >= DEF_CONSOLE_WIDTH || button.getTLY() + 4 >= DEF_CONSOLE_HEIGHT) return false;
+
+	clearBoarder(button.getTLX(), button.getTLY(), button.getTLX() + button.getLen() + 3, button.getTLY() + 4);
+	drawBoarder(button.getTLX(), button.getTLY(), button.getTLX() + button.getLen() + 3, button.getTLY() + 4);
+
+	Graphics::getInstance().gotoxy(button.getTLX() + 2, button.getTLY() + 2);std::cout << button.getText();
+
+	return true;
+}
+
 bool Graphics::drawFrame(const char *name, int level, const Bar &HP, const Bar &res, Colour col, int tlx, int tly)
 {
 	if (tlx < 0 || tly < 0 || tlx + DEF_FRAME_WIDTH >= DEF_CONSOLE_WIDTH || tly + DEF_FRAME_HEIGHT >= DEF_CONSOLE_HEIGHT)return false;
@@ -262,7 +274,7 @@ bool Graphics::drawCharacterInfo(const Player &player, int tlx, int tly)
 	drawBoarder(tlx, tly, tlx + DEF_CHAR_INFO_WIDTH, tly + DEF_CHAR_INFO_HEIGH);
 
 	setcolor(White);
-	gotoxy(tlx+2/*tlx + (DEF_CHAR_INFO_WIDTH - strlen(player.getName())) / 2 - 2*/, tly + 1);std::cout << player.getName()<<'('<<player.getLevel()<<')';
+	gotoxy(tlx+2, tly + 1);std::cout << player.getName()<<'('<<player.getLevel()<<')';
 	if (player.getLevel() < MAX_LEVEL) { gotoxy(tlx + 2, tly + 2);std::cout << "XP: " << player.getXP();std::cout << '/' << DEF_LEVEL_EXP[player.getLevel() - 1]; }
 	gotoxy(tlx + 2, tly + 3);std::cout << "Gold: " << player.getGold();
 	gotoxy(tlx + 2, tly + 4);std::cout << "Health: " << player.getHP().Max;
@@ -469,25 +481,33 @@ void Graphics::drawHomeUI(const Player &player)
 	drawBoarder(DEF_CHAR_INFO_WIDTH + 1, 0, DEF_CHAR_INFO_WIDTH + 19, DEF_CHAR_INFO_HEIGH);
 
 	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 1);std::cout << "Menu:";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 3);std::cout << "Play <P>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 4);std::cout << "Shop <S>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 5);std::cout << "Inventory <I>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 6);std::cout << "AbilityBook <A>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 7);std::cout << "Back <ESC>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 3);std::cout << "Home <H>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 4);std::cout << "Play <P>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 5);std::cout << "Shop <S>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 6);std::cout << "Inventory <I>";
+	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 7);std::cout << "AbilityBook <A>";
 	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 8);std::cout << "Exit <E>";
 }
 
-void Graphics::drawInventoryUI(const Player &player, Box **boxes, int num)
+void Graphics::drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem)
 {
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
 	Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
 	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	equipItem.showButton();
+	sellItem.showButton();
+	for (int i = 0;i < num;i++) boxes[i]->showBox();
+}
 
-	for (int i = 0;i < num;i++)
-	{
-		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * (i % 10) * (DEF_ITEM_SIZE + 1), 10 + (i / 10) * (DEF_ITEM_SIZE + 1));
-		boxes[i]->showBox();
-	}
+void Graphics::drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem)
+{
+	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
+	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
+
+	Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	buyItem.showButton();
+	for (int i = 0;i < num;i++) boxes[i]->showBox();
 }

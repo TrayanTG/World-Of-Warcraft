@@ -10,7 +10,7 @@ class Enemy: public Character
 	void setGold();
 
 public:
-	Enemy(int id = -1, const Damage &baseDamage = { 0,0 }, const Defence &baseDefence = { 0,0,0 }, 
+	Enemy(int id = -1, const Damage &damage = { 0,0 }, const Defence &defence = { 0,0,0 }, 
 		const Damage &levelUpDamage = { 0,0 }, const Defence &levelUpDefence = { 0,0 }, const char *name = "",
 		const Bar &HP = { 0,0 }, const Bar &res = { 0,0 }, int level = 1, int XP = 0, int gold = 0);
 	Enemy(const Enemy &other) = delete;

@@ -13,4 +13,11 @@ struct Defence
 		Health += other.Health;
 		return *this;
 	}
+	Defence& operator -= (const Defence &other)
+	{
+		Armor -= other.Armor;
+		MagicResist -= other.MagicResist;
+		Health -= other.Health;
+		return *this;
+	}
 };

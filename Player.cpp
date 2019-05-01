@@ -8,6 +8,7 @@ Player::Player() : Character()
 	equipItem(Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID));
 	addAbility(Data::getIstance().getAbilityByID(DEF_ABILITY_ID));
 	equipAbility(Data::getIstance().getAbilityByID(DEF_ABILITY_ID), DEF_ABILITY_SLOT);
+	transferDefenceToHP();
 }
 
 void Player::init()
@@ -25,48 +26,68 @@ void Player::init()
 bool Player::equipHelmet(Item *eqHelmet)
 {
 	if (helmet == eqHelmet)return false;
+	if (helmet->getID() >= 0) defence -= helmet->getDefenceStats();
+	defence += eqHelmet->getDefenceStats();
 	helmet = (Armor*)eqHelmet;
+	transferDefenceToHP();
 	return true;
 }
 
 bool Player::equipShoulders(Item *eqShoulders)
 {
 	if (shoulders == eqShoulders)return false;
+	if (shoulders->getID() >= 0) defence -= shoulders->getDefenceStats();
+	defence += eqShoulders->getDefenceStats();
 	shoulders = (Armor*)eqShoulders;
+	transferDefenceToHP();
 	return true;
 }
 
 bool Player::equipChest(Item *eqChest)
 {
 	if (chest == eqChest)return false;
+	if (chest->getID() >= 0) defence -= chest->getDefenceStats();
+	defence += eqChest->getDefenceStats();
 	chest = (Armor*)eqChest;
+	transferDefenceToHP();
 	return true;
 }
 
 bool Player::equipGloves(Item *eqGloves)
 {
 	if (gloves == eqGloves)return false;
+	if (gloves->getID() >= 0) defence -= gloves->getDefenceStats();
+	defence += eqGloves->getDefenceStats();
 	gloves = (Armor*)eqGloves;
+	transferDefenceToHP();
 	return true;
 }
 
 bool Player::equipLegs(Item *eqLegs)
 {
 	if (legs == eqLegs)return false;
+	if (legs->getID() >= 0) defence -= legs->getDefenceStats();
+	defence += eqLegs->getDefenceStats();
 	legs = (Armor*)eqLegs;
+	transferDefenceToHP();
 	return true;
 }
 
 bool Player::equipFeet(Item *eqFeet)
 {
 	if (feet == eqFeet)return false;
+	if (feet->getID() >= 0) defence -= feet->getDefenceStats();
+	defence += eqFeet->getDefenceStats();
 	feet = (Armor*)eqFeet;
+	transferDefenceToHP();
 	return true;
 }
 
 bool Player::equipWeapon(Item *eqWeapon)
 {
 	if (weapon == eqWeapon)return false;
+	if (weapon->getID() >= 0) damage -= weapon->getDamageStats();
+	damage += eqWeapon->getDamageStats();
 	weapon = (Weapon*)eqWeapon;
 	return true;
 }
@@ -239,9 +260,10 @@ Damage Player::dealDamage(int slot)const
 bool Player::levelUp()
 {
 	if (!Character::levelUp())return false;
+
 	for (size_t i = 0;i < Data::getIstance().abilities.size();i++)
 	{
-		if (Data::getIstance().abilities[i]->getMinLevel() <= level)
+		if (Data::getIstance().abilities[i]->getMinLevel() == level)
 		{
 			addAbility(Data::getIstance().abilities[i]);
 		}
@@ -260,19 +282,10 @@ int Player::calcDamage(const Damage &damage)const
 
 Damage Player::getTotalDamageStats()const
 {
-	Damage damage = baseDamage;
-	damage += weapon->getDamageStats();
 	return damage;
 }
 
 Defence Player::getTotalDefenceStats()const
 {
-	Defence defence = baseDefence;
-	defence += helmet->getDefenceStats();
-	defence += shoulders->getDefenceStats();
-	defence += chest->getDefenceStats();
-	defence += gloves->getDefenceStats();
-	defence += legs->getDefenceStats();
-	defence += feet->getDefenceStats();
 	return defence;
 }

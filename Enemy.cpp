@@ -1,12 +1,13 @@
 #include "Enemy.h"
 
-Enemy::Enemy(int id, const Damage &baseDamage, const Defence &baseDefence, const Damage &levelUpDamage, const Defence &levelUpDefence,
+Enemy::Enemy(int id, const Damage &damage, const Defence &defence, const Damage &levelUpDamage, const Defence &levelUpDefence,
 	const char *name, const Bar &HP, const Bar &res, int level, int XP, int gold):
-	Character(baseDamage, baseDefence, name, HP, res, level, XP, gold)
+	Character(damage, defence, name, HP, res, level, XP, gold)
 {
 	this->id = id;
 	this->levelUpDamage = levelUpDamage;
 	this->levelUpDefence = levelUpDefence;
+	transferDefenceToHP();
 }
 
 Enemy& Enemy::operator= (const Enemy &other)
@@ -16,6 +17,7 @@ Enemy& Enemy::operator= (const Enemy &other)
 	id = other.id;
 	levelUpDamage = other.levelUpDamage;
 	levelUpDefence = other.levelUpDefence;
+	transferDefenceToHP();
 	return *this;
 }
 
@@ -31,7 +33,7 @@ Enemy::~Enemy()
 
 void Enemy::setGold()
 {
-	gold += (baseDamage.Physical + baseDamage.Magical + baseDefence.Armor + baseDefence.MagicResist + HP.Max / 20) / 5;
+	gold += (damage.Physical + damage.Magical + defence.Armor + defence.MagicResist + HP.Max / 20) / 5;
 }
 
 int Enemy::getID()
@@ -43,11 +45,10 @@ void Enemy::setLevel(int level)
 {
 	for (;this->level < level;this->level++)
 	{
-		baseDamage += levelUpDamage;
-		baseDefence += levelUpDefence;
+		damage += levelUpDamage;
+		defence += levelUpDefence;
 	}
-	HP.Max += baseDefence.Health;
-	HP.Curr = HP.Max;
+	transferDefenceToHP();
 	setGold();
 }
 
@@ -77,7 +78,7 @@ bool Enemy::levelUp()
 
 void Enemy::regenRes()
 {
-	// empty
+	return;
 }
 
 int Enemy::calcDamage(const Damage &damage)const
@@ -96,10 +97,10 @@ Damage Enemy::dealDamage(int slot)const
 
 Damage Enemy::getTotalDamageStats()const
 {
-	return baseDamage;
+	return damage;
 }
 
 Defence Enemy::getTotalDefenceStats()const
 {
-	return baseDefence;
+	return defence;
 }

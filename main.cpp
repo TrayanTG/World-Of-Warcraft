@@ -9,11 +9,6 @@ using namespace std;
 
 int main()
 {
-	srand((size_t)time(0));
-	Data::getIstance().loadItems();
-	Data::getIstance().loadAbilities();
-	Data::getIstance().loadEnemies();
-
 	Engine::getInstance().logIn();
 	Engine::getInstance().initMouse();
 	
@@ -22,6 +17,8 @@ int main()
 
 	Engine::getInstance().Home();
 
+	//Graphics::getInstance().drawButton("Button", 150, 3);
+	while (true);
 	return 0;
 }
 

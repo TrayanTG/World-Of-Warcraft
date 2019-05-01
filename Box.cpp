@@ -68,6 +68,11 @@ bool Box::setXY(int x, int y)
 	return true;
 }
 
+int Box::getID()const
+{
+	return -1;
+}
+
 bool Box::showBox()const
 {
 	if (tlx < 0 || tly < 0 || tlx + 2 * size >= DEF_CONSOLE_WIDTH || tly + size >= DEF_CONSOLE_HEIGHT)return false;

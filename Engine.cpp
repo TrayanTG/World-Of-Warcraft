@@ -38,6 +38,109 @@ void Engine::initMouse()
 	SetConsoleMode(hin, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_MOUSE_INPUT);
 }
 
+void Engine::initHome(Box **boxes, int &cntBoxes, int &currBox)
+{
+	cntBoxes = 0;
+	currBox = -1;
+	for (int i = 0;i < 4;i++)
+	{
+		if (myPlayer->eqAbilities[i]->getID() >= 0)
+		{
+			boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+		}
+	}
+	if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
+	if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
+	if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
+	if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
+	if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
+	if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
+	if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
+}
+
+void Engine::initInventory(Box **boxes, Button &equipItem, Button &sellItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox)
+{
+	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
+	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
+
+	cntBoxes = 0;
+	currBox = invBoxes = markedBox = -1;
+	{
+		for (int i = 0;i < 4;i++)
+		{
+			if (myPlayer->eqAbilities[i]->getID() >= 0)
+			{
+				boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+			}
+		}
+		if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
+		if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
+		if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
+		if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
+		if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
+		if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
+		if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
+		invBoxes = cntBoxes;
+		for (size_t i = 0;i < myPlayer->items.size();i++)
+		{
+			bool f = true;
+			for (int k = 0;k < cntBoxes;k++)
+			{
+				if (boxes[k]->getID() == myPlayer->items[i]->getID()) { f = false;break; }
+			}
+			if (f) boxes[cntBoxes++] = myPlayer->items[i];
+		}
+	}
+	
+	equipItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
+	sellItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2 - 12, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
+
+	for (int i = invBoxes;i < cntBoxes;i++)
+	{
+		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1));
+	}
+}
+
+void Engine::initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox)
+{
+	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
+	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
+
+	cntBoxes = 0;
+	currBox = invBoxes = markedBox = -1;
+
+	{
+		for (int i = 0;i < 4;i++)
+		{
+			if (myPlayer->eqAbilities[i]->getID() >= 0)
+			{
+				boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+			}
+		}
+		for (size_t i = 0;i < myPlayer->items.size();i++)
+		{
+			boxes[cntBoxes++] = myPlayer->items[i];
+		}
+		invBoxes = cntBoxes;
+		for (size_t i = 0;i < Data::getIstance().items.size();i++)
+		{
+			bool f = true;
+			for (int k = 0; k < invBoxes; k++)
+			{
+				if (Data::getIstance().items[i]->getID() == boxes[k]->getID()) f = false;
+			}
+			if (f) boxes[cntBoxes++] = Data::getIstance().items[i];
+		}
+	}
+
+	for (int i = invBoxes;i < cntBoxes;i++)
+	{
+		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1));
+	}
+
+	buyItem.setXY((DEF_CONSOLE_WIDTH + DEF_FREE_BEG - buyItem.getLen() - 2) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 3);
+}
+
 void Engine::setCursorVisible(bool isVisible)
 {
 	if(!isVisible)cci.bVisible = FALSE;
@@ -49,11 +152,12 @@ void Engine::updateCursor()
 	while (true)
 	{
 		ReadConsoleInput(hin, &InputRecord, 1, &Events);
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		std::this_thread::sleep_for(std::chrono::milliseconds(25));
 		if (InputRecord.EventType == MOUSE_EVENT)
 		{
 			coord.X = InputRecord.Event.MouseEvent.dwMousePosition.X;
 			coord.Y = InputRecord.Event.MouseEvent.dwMousePosition.Y;
+			
 			/*if (InputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED) ///RIGHTMOST_BUTTON_PRESSED
 			{
 				SetConsoleCursorPosition(hout, coord);
@@ -135,27 +239,13 @@ void Engine::logIn()
 void Engine::Home()
 {
 	Box *boxes[16];
-	int cntBoxes = 0, currBox=-1;
-
-	{
-		for (int i = 0;i < 4;i++)
-		{
-			if (myPlayer->eqAbilities[i]->getID() >= 0)
-			{
-				boxes[cntBoxes++] = myPlayer->eqAbilities[i];
-			}
-		}
-		if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
-		if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
-		if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
-		if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
-		if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
-		if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
-		if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
-	}
+	int cntBoxes, currBox;
+	
+	initHome(boxes, cntBoxes, currBox);
 	
 	std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now();
+	Graphics::getInstance().clearscreen();
 	Graphics::getInstance().drawHomeUI(*myPlayer);
 	while (true)
 	{
@@ -166,11 +256,11 @@ void Engine::Home()
 		{
 			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
 			{
-			case 'S': std::cout << "SHOP";break;
+			case 'S': Shop();break;
 			case 'I': Inventory(); break;
 			case 'P': std::cout << "PLAY";break;
 			case 'A': std::cout << "ABILITIES";break;
-			case 'E': return;
+			case 'E': myPlayer->savePlayer(directory);exit(0);break;
 			}
 		}
 		else if (InputRecord.EventType == MOUSE_EVENT)
@@ -202,56 +292,93 @@ void Engine::Home()
 void Engine::Inventory()
 {
 	Box *boxes[128];
-	int cntBoxes = 0, currBox = -1, invBoxes = -1;
+	Button equipItem("  Equip  ");
+	Button sellItem("Sell(50%)");
+	int cntBoxes = 0, currBox = -1, invBoxes = -1, markedBox = -1;
 
-	{
-		for (int i = 0;i < 4;i++)
-		{
-			if (myPlayer->eqAbilities[i]->getID() >= 0)
-			{
-				boxes[cntBoxes++] = myPlayer->eqAbilities[i];
-			}
-		}
-		if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
-		if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
-		if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
-		if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
-		if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
-		if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
-		if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
-		invBoxes = cntBoxes;
-		for (size_t i = 0;i < myPlayer->items.size();i++)
-		{
-			bool f = true;
-			for (int k = 0;k < cntBoxes;k++)
-			{
-				if (boxes[k]->getID() == myPlayer->items[i]->getID()) { f = false;break; }
-			}
-			if(f) boxes[cntBoxes++] = myPlayer->items[i];
-		}
-	}
-
+	initInventory(boxes, equipItem, sellItem, cntBoxes, currBox, invBoxes, markedBox);
 	
 	std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now();
 	Graphics::getInstance().clearscreen();
 	Graphics::getInstance().drawHomeUI(*myPlayer);
-	Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes);
+	Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes-invBoxes, equipItem, sellItem);
 	
 	while (true)
 	{
-		std::this_thread::sleep_until(tp);
-		tp = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
+		if (InputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+		{
+			if (markedBox == -1)
+			{
+				for (int i = invBoxes;i < cntBoxes;i++)
+				{
+					if (boxes[i]->isWithin(coord.X, coord.Y))
+					{
+						markedBox = i;
+						boxes[markedBox]->setMarked(true);
+						Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
+						boxes[markedBox]->toggleInfoBox();
+					}
+				}
+			}
+			else
+			{
+				boxes[markedBox]->setMarked(false);
+				if (equipItem.isWithin(coord.X, coord.Y))
+				{
+					myPlayer->equipItem((Item*)boxes[markedBox]);
+					initInventory(boxes, equipItem, sellItem, cntBoxes, currBox, invBoxes, markedBox);
+					Graphics::getInstance().clearscreen();
+					Graphics::getInstance().drawHomeUI(*myPlayer);
+					Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
+					markedBox = -1;
+				}
+				else if (sellItem.isWithin(coord.X, coord.Y))
+				{
+					myPlayer->sellItem((Item*)boxes[markedBox]);
+					for (int i = markedBox + 1;i < cntBoxes;i++)
+					{
+						boxes[i - 1] = boxes[i];
+					}
+					cntBoxes--;
+					Graphics::getInstance().clearscreen();
+					Graphics::getInstance().drawHomeUI(*myPlayer);
+					Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
+					markedBox = -1;
+				}
+				else if (boxes[markedBox]->isWithin(coord.X, coord.Y))
+				{
+					markedBox = -1;
+				}
+				else
+				{
+					for (int i = invBoxes;i < cntBoxes;i++)
+					{
+						if (boxes[i]->isWithin(coord.X, coord.Y))
+						{
+							markedBox = i;
+							boxes[markedBox]->setMarked(true);
+							Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
+							boxes[markedBox]->toggleInfoBox();
+						}
+					}
+				}
+			}
+		}
+		//std::this_thread::sleep_until(tp);
+		if (tp > std::chrono::steady_clock::now())continue;
+		tp = std::chrono::steady_clock::now() + std::chrono::milliseconds(25);
 		myPlayer->savePlayer(directory);
+		
 		if (InputRecord.EventType == KEY_EVENT)
 		{
 			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
 			{
-			case 'S': std::cout << "SHOP";break;
-			case 'I': std::cout << "INVENTORY";break;
+			case 'S': Shop();break;
+			case 'H': Home();break;
 			case 'P': std::cout << "PLAY";break;
 			case 'A': std::cout << "ABILITIES";break;
-			case 'E': return;
+			case 'E': myPlayer->savePlayer(directory);exit(0);break;
 			}
 		}
 		else if (InputRecord.EventType == MOUSE_EVENT)
@@ -273,7 +400,66 @@ void Engine::Inventory()
 				{
 					boxes[currBox]->hideInfoBox();
 					if (currBox < invBoxes) Graphics::getInstance().drawHomeUI(*myPlayer);
-					else Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes);
+					else Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes-invBoxes, equipItem, sellItem);
+					currBox = -1;
+				}
+			}
+		}
+	}
+}
+
+void Engine::Shop()
+{
+	Box *boxes[128];
+	Button buyItem("   Buy   ");
+	int cntBoxes, currBox, invBoxes, markedBox;
+
+	initShop(boxes, buyItem, cntBoxes, currBox, invBoxes, markedBox);
+
+	std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now();
+	Graphics::getInstance().clearscreen();
+	Graphics::getInstance().drawHomeUI(*myPlayer);
+	Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
+	
+	while (true)
+	{
+
+		if (tp > std::chrono::steady_clock::now())continue;
+		tp = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
+		myPlayer->savePlayer(directory);
+
+		if (InputRecord.EventType == KEY_EVENT)
+		{
+			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
+			{
+			case 'I': Inventory();break;
+			case 'H': Home();break;
+			case 'P': std::cout << "PLAY";break;
+			case 'A': std::cout << "ABILITIES";break;
+			case 'E': myPlayer->savePlayer(directory);exit(0);break;
+			}
+		}
+		else if (InputRecord.EventType == MOUSE_EVENT)
+		{
+			if (currBox == -1)
+			{
+				for (int i = 0;i < cntBoxes;i++)
+				{
+					if (boxes[i]->isWithin(coord.X, coord.Y))
+					{
+						boxes[i]->toggleInfoBox();
+						currBox = i;
+					}
+				}
+			}
+			else
+			{
+				if (!boxes[currBox]->isWithin(coord.X, coord.Y))
+				{
+					boxes[currBox]->hideInfoBox();
+					if (currBox < invBoxes) Graphics::getInstance().drawHomeUI(*myPlayer);
+					else Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
 					currBox = -1;
 				}
 			}

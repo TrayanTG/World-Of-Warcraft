@@ -4,6 +4,7 @@
 
 #include "HeadersAndConsts.h"
 #include "Player.h"
+#include "Button.h"
 
 class Graphics
 {
@@ -41,12 +42,14 @@ public:
 
 	bool drawBoarder(int tlx, int tly, int brx, int bry);
 	bool clearBoarder(int tlx, int tly, int brx, int bry);
+	bool drawButton(const Button &button);
 	bool drawFrame(const char *name, int level, const Bar &HP, const Bar &res, Colour col, int tlx, int tly);
 	bool drawPlayer(const Player &player, int tlx, int tly);
 	bool drawPlayerUI(const Player &player, int tlx, int tly);
 	bool drawCharacterInfo(const Player &player, int tlx, int tly);
 	void drawHomeUI(const Player &player);
-	void drawInventoryUI(const Player &player, Box **boxes, int num);
+	void drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem);
+	void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem);
 
 	void drawClassChooseUI();
 	void drawNewOldUI();

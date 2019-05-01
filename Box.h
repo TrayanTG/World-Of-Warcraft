@@ -23,7 +23,7 @@ public:
 	bool setMarked(bool marked = true);
 	bool setXY(int x, int y);
 
-	virtual int getID()const = 0;
+	virtual int getID()const;
 	virtual bool showBox()const;
 	bool toggleInfoBox()const;
 	bool hideInfoBox()const;
