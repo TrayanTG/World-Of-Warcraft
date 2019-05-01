@@ -61,7 +61,7 @@ bool Box::setMarked(bool marked)
 
 bool Box::setXY(int x, int y)
 {
-	if (x < 0 || y < 0 || x >= DEF_CONSOLE_WIDTH - 2 * size  || y >= DEF_CONSOLE_HEIGHT - size)return false;
+	if (x < -1 || y < -1 || x >= DEF_CONSOLE_WIDTH - 2 * size  || y >= DEF_CONSOLE_HEIGHT - size)return false;
 	//std::cout << "here: " << name << std::endl;
 	tlx = x;
 	tly = y;

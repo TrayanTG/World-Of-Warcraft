@@ -58,7 +58,7 @@ const char *Button::getText()const
 
 bool Button::setXY(int tlx, int tly)
 {
-	if (tlx < 0 || tly < 0 || tlx + lenght + 3 >= DEF_CONSOLE_WIDTH || tly + 4 >= DEF_CONSOLE_HEIGHT) return false;
+	if (tlx < -1 || tly < -1 || tlx + lenght + 3 >= DEF_CONSOLE_WIDTH || tly + 4 >= DEF_CONSOLE_HEIGHT) return false;
 	this->tlx = tlx;
 	this->tly = tly;
 	return true;

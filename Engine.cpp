@@ -238,6 +238,7 @@ void Engine::logIn()
 
 void Engine::Home()
 {
+	char t = 0;
 	Box *boxes[16];
 	int cntBoxes, currBox;
 	
@@ -256,12 +257,13 @@ void Engine::Home()
 		{
 			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
 			{
-			case 'S': Shop();break;
-			case 'I': Inventory(); break;
-			case 'P': std::cout << "PLAY";break;
-			case 'A': std::cout << "ABILITIES";break;
-			case 'E': myPlayer->savePlayer(directory);exit(0);break;
+			case 'S': t = 'S'; break;
+			case 'I': t = 'I'; break;
+			case 'P': t = 'P'; break;
+			case 'A': t = 'A'; break;
+			case 'E': exit(0);
 			}
+			if (t)break;
 		}
 		else if (InputRecord.EventType == MOUSE_EVENT)
 		{
@@ -287,10 +289,14 @@ void Engine::Home()
 			}
 		}
 	}
+	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	if (t == 'I')Inventory();
+	if (t == 'S')Shop();
 }
 
 void Engine::Inventory()
 {
+	char t = 0;
 	Box *boxes[128];
 	Button equipItem("  Equip  ");
 	Button sellItem("Sell(50%)");
@@ -374,12 +380,13 @@ void Engine::Inventory()
 		{
 			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
 			{
-			case 'S': Shop();break;
-			case 'H': Home();break;
-			case 'P': std::cout << "PLAY";break;
-			case 'A': std::cout << "ABILITIES";break;
-			case 'E': myPlayer->savePlayer(directory);exit(0);break;
+			case 'S': t = 'S'; break;
+			case 'H': t = 'H'; break;
+			case 'P': t = 'P'; break;
+			case 'A': t = 'A'; break;
+			case 'E': exit(0);
 			}
+			if (t)break;
 		}
 		else if (InputRecord.EventType == MOUSE_EVENT)
 		{
@@ -406,10 +413,16 @@ void Engine::Inventory()
 			}
 		}
 	}
+	equipItem.setXY(-1, -1);
+	sellItem.setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	if (t == 'H')Home();
+	if (t == 'S')Shop();
 }
 
 void Engine::Shop()
 {
+	char t = 0;
 	Box *boxes[128];
 	Button buyItem("   Buy   ");
 	int cntBoxes, currBox, invBoxes, markedBox;
@@ -424,7 +437,52 @@ void Engine::Shop()
 	
 	while (true)
 	{
-
+		if (InputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
+		{
+			if (markedBox == -1)
+			{
+				for (int i = invBoxes;i < cntBoxes;i++)
+				{
+					if (boxes[i]->isWithin(coord.X, coord.Y))
+					{
+						markedBox = i;
+						boxes[markedBox]->setMarked(true);
+						Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
+						boxes[markedBox]->toggleInfoBox();
+					}
+				}
+			}
+			else
+			{
+				boxes[markedBox]->setMarked(false);
+				if (buyItem.isWithin(coord.X, coord.Y))
+				{
+					myPlayer->buyItem((Item*)boxes[markedBox]);
+					initShop(boxes, buyItem, cntBoxes, currBox, invBoxes, markedBox);
+					Graphics::getInstance().clearscreen();
+					Graphics::getInstance().drawHomeUI(*myPlayer);
+					Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
+					markedBox = -1;
+				}
+				else if (boxes[markedBox]->isWithin(coord.X, coord.Y))
+				{
+					markedBox = -1;
+				}
+				else
+				{
+					for (int i = invBoxes;i < cntBoxes;i++)
+					{
+						if (boxes[i]->isWithin(coord.X, coord.Y))
+						{
+							markedBox = i;
+							boxes[markedBox]->setMarked(true);
+							Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
+							boxes[markedBox]->toggleInfoBox();
+						}
+					}
+				}
+			}
+		}
 		if (tp > std::chrono::steady_clock::now())continue;
 		tp = std::chrono::steady_clock::now() + std::chrono::milliseconds(250);
 		myPlayer->savePlayer(directory);
@@ -433,12 +491,13 @@ void Engine::Shop()
 		{
 			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
 			{
-			case 'I': Inventory();break;
-			case 'H': Home();break;
-			case 'P': std::cout << "PLAY";break;
-			case 'A': std::cout << "ABILITIES";break;
-			case 'E': myPlayer->savePlayer(directory);exit(0);break;
+			case 'H': t = 'H'; break;
+			case 'I': t = 'I'; break;
+			case 'P': t = 'P'; break;
+			case 'A': t = 'A'; break;
+			case 'E': exit(0);
 			}
+			if (t)break;
 		}
 		else if (InputRecord.EventType == MOUSE_EVENT)
 		{
@@ -465,4 +524,8 @@ void Engine::Shop()
 			}
 		}
 	}
+	buyItem.setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	if (t == 'H')Home();
+	if (t == 'I')Inventory();
 }
