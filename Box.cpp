@@ -73,7 +73,7 @@ int Box::getID()const
 	return -1;
 }
 
-bool Box::showBox()const
+bool Box::showBox(const Damage &damage)const
 {
 	if (tlx < 0 || tly < 0 || tlx + 2 * size >= DEF_CONSOLE_WIDTH || tly + size >= DEF_CONSOLE_HEIGHT)return false;
 	Graphics::getInstance().clearBoarder(tlx, tly, tlx + 2 * size, tly + size);

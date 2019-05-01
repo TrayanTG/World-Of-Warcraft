@@ -86,7 +86,7 @@ void Engine::initInventory(Box **boxes, Button &equipItem, Button &sellItem, int
 			bool f = true;
 			for (int k = 0;k < cntBoxes;k++)
 			{
-				if (boxes[k]->getID() == myPlayer->items[i]->getID()) { f = false;break; }
+				if (typeid(boxes[k]) != typeid(Ability*) && boxes[k]->getID() == myPlayer->items[i]->getID()) { f = false;break; }
 			}
 			if (f) boxes[cntBoxes++] = myPlayer->items[i];
 		}
@@ -127,7 +127,7 @@ void Engine::initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox,
 			bool f = true;
 			for (int k = 0; k < invBoxes; k++)
 			{
-				if (Data::getIstance().items[i]->getID() == boxes[k]->getID()) f = false;
+				if (typeid(boxes[k]) != typeid(Ability*) && Data::getIstance().items[i]->getID() == boxes[k]->getID()) f = false;
 			}
 			if (f) boxes[cntBoxes++] = Data::getIstance().items[i];
 		}
@@ -139,6 +139,58 @@ void Engine::initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox,
 	}
 
 	buyItem.setXY((DEF_CONSOLE_WIDTH + DEF_FREE_BEG - buyItem.getLen() - 2) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 3);
+}
+
+void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox)
+{
+	int totalLenX = 6 * (DEF_ABILITY_SIZE + 1);
+	int totalLenY = 3 * (DEF_ABILITY_SIZE + 1);
+
+	cntBoxes = 0;
+	currBox = invBoxes = markedBox = -1;
+
+	for (int i = 0;i < 4;i++)
+	{
+		if (myPlayer->eqAbilities[i]->getID() >= 0)
+		{
+			boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+		}
+	}
+	if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
+	if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
+	if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
+	if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
+	if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
+	if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
+	if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
+	invBoxes = cntBoxes;
+
+	for (size_t i = 0;i < myPlayer->abilities.size();i++)
+	{
+		bool f = true;
+		for (int k = 0;k < invBoxes;k++)
+		{
+			if (typeid(*boxes[k]) == typeid(Ability) && boxes[k]->getID() == myPlayer->abilities[i]->getID()) { f = false;break; }
+		}
+		if (f) boxes[cntBoxes++] = myPlayer->abilities[i];
+	}
+
+	//((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2
+	//(DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1
+	//((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2
+	//(DEF_CONSOLE_HEIGHT + totalLenY) / 2
+
+	eqSlot1.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4);
+	eqSlot2.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4);
+	eqSlot3.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
+	eqSlot4.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
+
+	for (int i = 0;i < cntBoxes - invBoxes;i++)
+	{
+		//std::cout << "NICE";
+		boxes[i+invBoxes]->setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + 1 + 2 * (i % 3) * (DEF_ABILITY_SIZE + 1), (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 5 + (i / 3)*(DEF_ABILITY_SIZE + 1));
+		//boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1));
+	}//system("pause");
 }
 
 void Engine::setCursorVisible(bool isVisible)
@@ -292,6 +344,7 @@ void Engine::Home()
 	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
 	if (t == 'I')Inventory();
 	if (t == 'S')Shop();
+	if (t == 'A')AbilityBook();
 }
 
 void Engine::Inventory()
@@ -418,6 +471,7 @@ void Engine::Inventory()
 	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
 	if (t == 'H')Home();
 	if (t == 'S')Shop();
+	if (t == 'A')AbilityBook();
 }
 
 void Engine::Shop()
@@ -528,4 +582,31 @@ void Engine::Shop()
 	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
 	if (t == 'H')Home();
 	if (t == 'I')Inventory();
+	if (t == 'A')AbilityBook();
+}
+
+void Engine::AbilityBook()
+{
+	char t = 0;
+	Box *boxes[16];
+	Button eqSlot1("Equip slot1");
+	Button eqSlot2("Equip slot2");
+	Button eqSlot3("Equip slot3");
+	Button eqSlot4("Equip slot4");
+	int cntBoxes, currBox, invBoxes, markedBox;
+
+	initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
+
+	Graphics::getInstance().clearscreen();
+	Graphics::getInstance().drawHomeUI(*myPlayer);
+	Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+
+	//boxes[cntBoxes - 1]->toggleInfoBox();
+
+	//std::cout << myPlayer->abilities.size() << ' ' << cntBoxes;system("pause");
+
+	while (true)
+	{
+
+	}
 }

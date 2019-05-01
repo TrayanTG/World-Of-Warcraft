@@ -34,7 +34,7 @@ Weapon::Weapon(std::ifstream &iFile)
 	*this = Weapon(id, price, minLevel, damage, weaponType, title, description, name, 3);
 }
 
-bool Weapon::showBox()const
+bool Weapon::showBox(const Damage &damage)const
 {
 	if (Box::showBox() == false)return false;
 	if (id >= 0)

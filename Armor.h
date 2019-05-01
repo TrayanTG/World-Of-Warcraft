@@ -13,7 +13,7 @@ public:
 	Armor(std::ifstream &iFile);
 
 	ArmorType getArmorType()const;
-	virtual bool showBox()const;
+	virtual bool showBox(const Damage &damage = { 0,0 })const;
 	virtual Damage getDamageStats()const;
 	virtual Defence getDefenceStats()const;
 };

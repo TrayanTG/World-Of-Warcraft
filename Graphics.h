@@ -50,6 +50,7 @@ public:
 	void drawHomeUI(const Player &player);
 	void drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem);
 	void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem);
+	void drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4);
 
 	void drawClassChooseUI();
 	void drawNewOldUI();

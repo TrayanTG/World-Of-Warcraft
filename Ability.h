@@ -29,6 +29,6 @@ public:
 	int getResReq()const;
 	bool reduceCD(int ms);
 
-	bool showBox(const Damage &damage)const;
+	virtual bool showBox(const Damage &damage)const;
 	void showCD()const;
 };

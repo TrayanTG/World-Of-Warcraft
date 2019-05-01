@@ -38,7 +38,7 @@ Armor::Armor(std::ifstream &iFile)
 	*this = Armor(id, price, minLevel, defence, armorType, title, description, name, 3);
 }
 
-bool Armor::showBox()const
+bool Armor::showBox(const Damage &damage)const
 {
 	if (Box::showBox() == false)return false;
 	if (id >= 0)

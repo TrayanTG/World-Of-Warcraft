@@ -24,7 +24,7 @@ public:
 	bool setXY(int x, int y);
 
 	virtual int getID()const;
-	virtual bool showBox()const;
+	virtual bool showBox(const Damage &damage = { 0,0 })const;
 	bool toggleInfoBox()const;
 	bool hideInfoBox()const;
 };

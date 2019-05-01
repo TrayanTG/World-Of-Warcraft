@@ -511,3 +511,17 @@ void Graphics::drawShopUI(const Player &player, Box **boxes, int num, Button &bu
 	buyItem.showButton();
 	for (int i = 0;i < num;i++) boxes[i]->showBox();
 }
+
+void Graphics::drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4)
+{
+	int totalLenX = 6 * (DEF_ABILITY_SIZE + 1);
+	int totalLenY = 3 * (DEF_ABILITY_SIZE + 1);
+
+	Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
+	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
+	eqSlot1.showButton();
+	eqSlot2.showButton();
+	eqSlot3.showButton();
+	eqSlot4.showButton();
+	for (int i = 0;i < num;i++) (Ability*)boxes[i]->showBox(player.getTotalDamageStats());
+}
