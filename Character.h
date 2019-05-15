@@ -21,7 +21,7 @@ protected:
 public:
 	Character(const Damage &damage = { 0,0 }, const Defence &defence = { 0,0,0 }, const char *name = "",
 		const Bar &HP = { 0,0 }, const Bar &res = { 0,0 }, int level = 1, int XP = 0, int gold = 0);
-	Character(const Character&) = delete;
+	Character(const Character &other);
 	Character& operator= (const Character &other);
 	Character(std::ifstream &iFile);
 	virtual ~Character();

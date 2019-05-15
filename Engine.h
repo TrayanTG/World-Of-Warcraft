@@ -2,6 +2,7 @@
 
 #include "HeadersAndConsts.h"
 #include "Graphics.h"
+#include "EnemyBox.h"
 
 
 class Engine
@@ -21,6 +22,8 @@ class Engine
 	Player *myPlayer;
 	char directory[MAX_PATH_LENGHT];
 
+	void randomizeEnemies(EnemyBox **enemies, int enemyCnt);
+
 public:
 	void updateCursor();
 	Engine(const Engine&) = delete;
@@ -37,10 +40,14 @@ public:
 	void initInventory(Box **boxes, Button &equipItem, Button &sellItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
 	void initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
 	void initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
+	void loadMap(EnemyBox **enemies, int &enemyCnt);
+	void enemyMove(EnemyBox **enemies, int &enemyCnt, int currEnemy);
 
 	void logIn();
 	void Home();
 	void Inventory();
 	void Shop();
 	void AbilityBook();
+	void Map();
+	void Play(Enemy &enemy);
 };

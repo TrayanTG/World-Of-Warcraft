@@ -5,6 +5,7 @@
 #include "HeadersAndConsts.h"
 #include "Player.h"
 #include "Button.h"
+#include "EnemyBox.h"
 
 class Graphics
 {
@@ -51,8 +52,10 @@ public:
 	void drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem);
 	void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem);
 	void drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4);
+	void drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt);
 
 	void drawClassChooseUI();
+	void drawMapChooseUI();
 	void drawNewOldUI();
 	void drawEnterName();
 

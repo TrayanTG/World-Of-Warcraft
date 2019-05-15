@@ -8,6 +8,15 @@ Enemy::Enemy(int id, const Damage &damage, const Defence &defence, const Damage 
 	this->levelUpDamage = levelUpDamage;
 	this->levelUpDefence = levelUpDefence;
 	transferDefenceToHP();
+	setLevel(level);
+}
+
+Enemy::Enemy(const Enemy &other): Character(other)
+{
+	id = other.id;
+	levelUpDamage = other.levelUpDamage;
+	levelUpDefence = other.levelUpDefence;
+	transferDefenceToHP();
 }
 
 Enemy& Enemy::operator= (const Enemy &other)
@@ -43,7 +52,7 @@ int Enemy::getID()
 
 void Enemy::setLevel(int level)
 {
-	for (;this->level < level;this->level++)
+	for (this->level = 1;this->level < level;this->level++)
 	{
 		damage += levelUpDamage;
 		defence += levelUpDefence;

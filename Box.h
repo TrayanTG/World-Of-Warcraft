@@ -18,13 +18,17 @@ public:
 	Box& operator= (const Box &other);
 	~Box();
 
-	bool isWithin(int x, int y)const; //not tested
+	int getTLX()const;
+	int getTLY()const;
+
+	bool isWithin(int x, int y, int range = 0)const; //not tested
 	bool isMarked()const;
 	bool setMarked(bool marked = true);
 	bool setXY(int x, int y);
 
 	virtual int getID()const;
 	virtual bool showBox(const Damage &damage = { 0,0 })const;
+	bool hideBox()const;
 	bool toggleInfoBox()const;
 	bool hideInfoBox()const;
 };

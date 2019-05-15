@@ -107,12 +107,17 @@ void Graphics::setFontSize(int size)
 	cfi.FontFamily = FF_DONTCARE;
 	cfi.FontWeight = FW_NORMAL;
 	wcscpy_s(cfi.FaceName, L"Consolas"); // Choose your font
+	//wcscpy_s(cfi.FaceName, L"Lucida Console"); // Choose your font
+
 	SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
 }
 
 void Graphics::init()
 {
+
+	//for (int i = 0;i < 256;i++)std::cout << (char)i;system("pause");
 	system("chcp 437");
+	//system("chcp 8217");
 	//Engine::getInstance().initMouse();
 	setFontSize(DEF_CONSOLE_SIZE);
 	SetConsoleWindowSize(DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT);
@@ -456,6 +461,18 @@ void Graphics::drawClassChooseUI()
 	gotoxy((DEF_CONSOLE_WIDTH/2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 + 1);std::cout << "-Paladin <P>";
 }
 
+void Graphics::drawMapChooseUI()
+{
+	setFontSize(DEF_CONSOLE_SIZE * 2);
+	SetConsoleWindowSize(DEF_CONSOLE_WIDTH / 2, DEF_CONSOLE_HEIGHT / 2);
+	clearscreen();
+
+	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 2);std::cout << "Choose map:";
+	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 1);std::cout << "-Elwynn Forest <E>";
+	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 0);std::cout << "-Durotar <D>";
+	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 + 1);std::cout << "-Boss Lands <B>";
+}
+
 void Graphics::drawNewOldUI()
 {
 	clearscreen();
@@ -527,4 +544,16 @@ void Graphics::drawAbilityBookUI(const Player &player, Box **boxes, int num, But
 	eqSlot3.showButton();
 	eqSlot4.showButton();
 	for (int i = 0;i < num;i++) (Ability*)boxes[i]->showBox(player.getTotalDamageStats());
+}
+
+void Graphics::drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt)
+{
+	clearscreen();
+	gotoxy(0, 0);std::cout << "E";
+	gotoxy(pos.first, pos.second);
+	std::cout << 'P';
+	for (int i = 0;i < enemyCnt;i++)
+	{
+		/*if(enemies[i]->getHP().Curr>0)*/enemies[i]->showBox();//std::cout << i;
+	}
 }

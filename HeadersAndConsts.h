@@ -20,7 +20,12 @@
 #include "Defence.h"
 #include "Bar.h"
 
-const int KEY_ESC = 27;
+//const int KEY_ESC = 27;
+const int KEY_ARROW_UP = 38;
+const int KEY_ARROW_DOWN = 40;
+const int KEY_ARROW_LEFT = 37;
+const int KEY_ARROW_RIGHT = 39;
+
 
 const int MAX_INFOBOX_WIDTH = 16;
 const int MAX_PATH_LENGHT = 64;
@@ -30,6 +35,8 @@ const int MAX_DESCRIPTION_LENGHT = 256;
 const int MAX_LEVEL = 10;
 const int MAX_NAME_LENGHT = 16;
 const int MAX_ARMORTYPE_LENGHT = 16;
+const int MAX_ENEMY_CNT = 16;
+const int MAX_LEVEL_DIF = 4;
 
 const int MIN_INFOBOX_WIDTH = MAX_INFOBOX_WIDTH / 2;
 
@@ -37,6 +44,7 @@ const int DEF_CONSOLE_WIDTH = 160;
 const int DEF_CONSOLE_HEIGHT = 40;
 const int DEF_CONSOLE_SIZE = 15;
 const int DEF_INFOBOX_WIDTH = (MAX_INFOBOX_WIDTH + MIN_INFOBOX_WIDTH) / 2;
+const int DEF_ENEMY_SIZE = 2;
 const int DEF_ITEM_SIZE = 3;
 const int DEF_ABILITY_SIZE = 4;
 const int DEF_LIST_SIZE = 64;

@@ -13,34 +13,35 @@ void Character::setCharacter(const Damage &damage, const Defence &defence, const
 	this->level = level;
 	this->XP = XP;
 	this->gold = gold;
+	transferDefenceToHP();
 }
 
 Character::Character(const Damage &damage, const Defence &defence, const char *name, const Bar &HP, const Bar &res, int level, int XP, int gold):
-	damage(damage), defence(defence)
+	damage(damage), defence(defence), HP(HP), res(res)
 {
 	this->name = new char[strlen(name) + 1];
 	strcpy(this->name, name);
-	this->HP = HP;
-	this->res = res;
 	this->level = level;
 	this->XP = XP;
 	this->gold = gold;
 	transferDefenceToHP();
 }
 
-Character& Character::operator= (const Character &other)
+Character::Character(const Character &other):
+	damage(other.damage), defence(other.defence), HP(HP), res(res)
 {
-	if (this == &other) return *this;
-	damage = other.damage;
-	defence = other.defence;
 	name = new char[strlen(other.name) + 1];
 	strcpy(name, other.name);
-	HP = other.HP;
-	res = other.res;
 	level = other.level;
 	XP = other.XP;
 	gold = other.gold;
 	transferDefenceToHP();
+}
+
+Character& Character::operator= (const Character &other)
+{
+	if (this == &other) return *this;
+	setCharacter(other.damage, other.defence, other.name, other.HP, other.res, other.level, other.XP, other.gold);
 	return *this;
 }
 

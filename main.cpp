@@ -15,9 +15,9 @@ int main()
 	thread mouseThread(&Engine::updateCursor, &Engine::getInstance());
 	mouseThread.detach();
 
-	Engine::getInstance().Home();
+	//Engine::getInstance().Map();
 
-	//Graphics::getInstance().drawButton("Button", 150, 3);
+	Engine::getInstance().Home();
 	while (true);
 	return 0;
 }

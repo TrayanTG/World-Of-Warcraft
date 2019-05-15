@@ -41,10 +41,20 @@ int Box::getQuadrant()const
 	return 4;
 }
 
-bool Box::isWithin(int x, int y)const //not tested
+int Box::getTLX()const
+{
+	return tlx;
+}
+
+int Box::getTLY()const
+{
+	return tly;
+}
+
+bool Box::isWithin(int x, int y, int range)const //not tested
 {
 	if (x < 0 || y < 0 || x >= DEF_CONSOLE_WIDTH || y >= DEF_CONSOLE_HEIGHT)return false;
-	return x >= tlx && x <= tlx + 2 * size && y >= tly && y <= tly + size;
+	return x >= tlx - 2 * range && x <= tlx + 2 * size + 2 * range && y >= tly - range && y <= tly + size + range;
 }
 
 bool Box::isMarked()const
@@ -84,6 +94,12 @@ bool Box::showBox(const Damage &damage)const
 	std::cout << name;
 	Graphics::getInstance().gotoxy(tlx + 1, tly + 2);
 	return true;
+}
+
+bool Box::hideBox()const
+{
+	if (tlx < 0 || tly < 0 || tlx + 2 * size >= DEF_CONSOLE_WIDTH || tly + size >= DEF_CONSOLE_HEIGHT)return false;
+	Graphics::getInstance().clearBoarder(tlx, tly, tlx + 2 * size, tly + size);
 }
 
 bool Box::toggleInfoBox()const

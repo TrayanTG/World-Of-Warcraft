@@ -39,6 +39,147 @@ void Engine::initMouse()
 	SetConsoleMode(hin, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_MOUSE_INPUT);
 }
 
+void Engine::randomizeEnemies(EnemyBox **enemies, int enemyCnt)
+{
+	bool f;
+	int x, y;
+	for (int i = 0;i < enemyCnt;i++)
+	{
+		f = true;
+		x = 10 + rand() % (DEF_CONSOLE_WIDTH - 10 - 2 * (DEF_ENEMY_SIZE + 1));
+		y = 5 + rand() % (DEF_CONSOLE_HEIGHT - 5 - (DEF_ENEMY_SIZE + 1));
+		for (int j = 0;j < i;j++)
+		{
+
+			if (enemies[j]->isWithin(x, y, 2 * DEF_ENEMY_SIZE)){		
+				i--;
+				f = false;
+				break;
+			}
+		}
+		if (f) enemies[i]->setXY(x, y);
+	}
+}
+
+void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int currEnemy)
+{
+	for (int i = 0;i < enemyCnt;i++)
+	{
+		int t = rand() % 5;
+		
+		switch (t)
+		{
+			case 0: break;
+			case 1:
+			{
+				if (enemies[i]->getTLX() < 5) break;
+				bool f = true;
+				for (int j = 0;j < enemyCnt;j++)
+				{
+					if (j == i)continue;
+					if (enemies[j]->isWithin(enemies[i]->getTLX() - 4, enemies[i]->getTLY(), DEF_ENEMY_SIZE))
+					{
+						f = false;
+						break;
+					}
+				}
+				if (f)
+				{
+					enemies[i]->hideBox();
+					if (i == currEnemy)
+					{
+						enemies[i]->hideInfoBox();
+						for (int j = 0;j < i;j++)enemies[j]->showBox();
+					}
+					enemies[i]->setXY(enemies[i]->getTLX() - 4, enemies[i]->getTLY());
+					enemies[i]->showBox();
+				}
+				break;
+			}
+			case 2:
+			{
+				if (enemies[i]->getTLX() >= DEF_CONSOLE_WIDTH - 2 * (DEF_ENEMY_SIZE + 1)) break;
+				bool f = true;
+				for (int j = 0;j < enemyCnt;j++)
+				{
+					if (j == i)continue;
+					if (enemies[j]->isWithin(enemies[i]->getTLX() + 4, enemies[i]->getTLY(), DEF_ENEMY_SIZE))
+					{
+						f = false;
+						break;
+					}
+				}
+				if (f)
+				{
+					enemies[i]->hideBox();
+					if (i == currEnemy)
+					{
+						enemies[i]->hideInfoBox();
+						for (int j = 0;j < i;j++)enemies[j]->showBox();
+					}
+					enemies[i]->setXY(enemies[i]->getTLX() + 4, enemies[i]->getTLY());
+					enemies[i]->showBox();
+				}
+				break;
+			}
+			case 3:
+			{
+				if (enemies[i]->getTLY() <= 0) break;
+				bool f = true;
+				for (int j = 0;j < enemyCnt;j++)
+				{
+					if (j == i)continue;
+					if (enemies[j]->isWithin(enemies[i]->getTLX(), enemies[i]->getTLY() - 1, DEF_ENEMY_SIZE))
+					{
+						f = false;
+						break;
+					}
+				}
+				if (f)
+				{
+					enemies[i]->hideBox();
+					if (i == currEnemy)
+					{
+						enemies[i]->hideInfoBox();
+						for (int j = 0;j < i;j++)enemies[j]->showBox();
+					}
+					enemies[i]->setXY(enemies[i]->getTLX(), enemies[i]->getTLY() - 1);
+					enemies[i]->showBox();
+				}
+				break;
+			}
+			case 4:
+			{
+				if (enemies[i]->getTLY() >= DEF_CONSOLE_WIDTH - (DEF_ENEMY_SIZE + 1)) break;
+				bool f = true;
+				for (int j = 0;j < enemyCnt;j++)
+				{
+					if (j == i)continue;
+					if (enemies[j]->isWithin(enemies[i]->getTLX(), enemies[i]->getTLY() + 1, DEF_ENEMY_SIZE))
+					{
+						f = false;
+						break;
+					}
+				}
+				if (f)
+				{
+					enemies[i]->hideBox();
+					if (i == currEnemy)
+					{
+						enemies[i]->hideInfoBox();
+						for (int j = 0;j < i;j++)enemies[j]->showBox();
+					}
+					enemies[i]->setXY(enemies[i]->getTLX(), enemies[i]->getTLY() + 1);
+					enemies[i]->showBox();
+				}
+				break;
+			}
+		}
+
+		if (currEnemy>=0 && enemies[currEnemy]->isWithin(coord.X, coord.Y))enemies[currEnemy]->toggleInfoBox();
+	}
+}
+
 void Engine::initHome(Box **boxes, int &cntBoxes, int &currBox)
 {
 	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
@@ -293,6 +434,35 @@ void Engine::logIn()
 	Graphics::getInstance().init();
 }
 
+void Engine::loadMap(EnemyBox **enemies, int &enemyCnt)
+{
+	char chooseMap, path[MAX_PATH_LENGHT], temp[4];
+	int enemyIDs[MAX_ENEMY_CNT], index = 0;
+	Graphics::getInstance().drawMapChooseUI();
+	do
+	{
+		chooseMap = (char)InputRecord.Event.KeyEvent.wVirtualKeyCode;
+		if (chooseMap >= 'a')chooseMap -= ('a' - 'A');
+	} while (chooseMap != 'E' && chooseMap != 'D' && chooseMap != 'B');
+	// ---------------------------------------------
+	std::ifstream iFile;
+	strcpy(path, "Data/Maps/");
+	if (chooseMap == 'E')strcat(path, "ElwynnForest");
+	else if (chooseMap == 'D')strcat(path, "Durotar");
+	else strcat(path, "BossLands");
+	iFile.open(path);
+	if (!iFile) exit(-1);
+	iFile >> enemyCnt;
+	if (enemyCnt > MAX_ENEMY_CNT) exit(-1);
+	while (iFile) iFile >> enemyIDs[index++];index--;
+	iFile.close();
+	for (int i = index;i < enemyCnt;i++) enemyIDs[i] = enemyIDs[rand() % index];
+	for (int i = 0;i < enemyCnt;i++)
+	{
+		enemies[i] = new EnemyBox(temp, *Data::getIstance().getEnemyByID(enemyIDs[i]), myPlayer->getLevel() + rand() % MAX_LEVEL_DIF);
+	}
+}
+
 void Engine::Home()
 {
 	char t = 0;
@@ -350,6 +520,7 @@ void Engine::Home()
 	if (t == 'I')Inventory();
 	if (t == 'S')Shop();
 	if (t == 'A')AbilityBook();
+	if (t == 'P')Map();
 }
 
 void Engine::Inventory()
@@ -480,6 +651,7 @@ void Engine::Inventory()
 	if (t == 'H')Home();
 	if (t == 'S')Shop();
 	if (t == 'A')AbilityBook();
+	if (t == 'P')Map();
 }
 
 void Engine::Shop()
@@ -596,6 +768,7 @@ void Engine::Shop()
 	if (t == 'H')Home();
 	if (t == 'I')Inventory();
 	if (t == 'A')AbilityBook();
+	if (t == 'P')Map();
 }
 
 void Engine::AbilityBook()
@@ -744,4 +917,87 @@ void Engine::AbilityBook()
 	if (t == 'H')Home();
 	if (t == 'S')Shop();
 	if (t == 'I')Inventory();
+	if (t == 'P')Map();
+}
+
+void Engine::Map()
+{
+	EnemyBox *enemies[MAX_ENEMY_CNT];
+	int cntEnemies, currEnemy = -1;
+	std::pair<int, int> playerPos(1,1);
+	
+	loadMap(enemies, cntEnemies);
+	randomizeEnemies(enemies, cntEnemies);
+	Graphics::getInstance().init();
+	Graphics::getInstance().drawMap(playerPos, enemies, cntEnemies);
+
+	std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point moveCD = std::chrono::steady_clock::now();
+	initMouse();
+	coord.X = 0;
+	coord.Y = 0;
+	
+	while (true)
+	{
+		//Graphics::getInstance().gotoxy(0, 0);std::cout << coord.X << ' ' << coord.Y;
+		if (playerPos.first == 0 && playerPos.second == 0) Home();
+		for (int i = 0;i < cntEnemies;i++) if (enemies[i]->isWithin(playerPos.first, playerPos.second)) Play((Enemy&)enemies[i]);
+		
+		{//Mouse Hover
+			if (currEnemy == -1)
+			{
+				for (int i = 0;i < cntEnemies;i++)
+				{
+					if (enemies[i]->isWithin(coord.X, coord.Y))
+					{
+						enemies[i]->toggleInfoBox();
+						currEnemy = i;
+					}
+				}
+			}
+			else
+			{
+				if (!enemies[currEnemy]->isWithin(coord.X, coord.Y))
+				{
+					enemies[currEnemy]->hideInfoBox();
+					for (int i = 0;i < cntEnemies;i++)enemies[i]->showBox();
+					currEnemy = -1;
+				}
+			}
+		}
+		if (InputRecord.EventType == KEY_EVENT)
+		{
+			Graphics::getInstance().gotoxy(playerPos.first, playerPos.second);std::cout << ' ';
+			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
+			{
+			case KEY_ARROW_UP: if (playerPos.second > 0)playerPos.second--; break;
+			case KEY_ARROW_DOWN: if (playerPos.second < DEF_CONSOLE_HEIGHT - 1)playerPos.second++; break;
+			case KEY_ARROW_LEFT: 
+				if (playerPos.first == 1)playerPos.first--;
+				if (playerPos.first > 1)playerPos.first -= 2;
+				break;
+			case KEY_ARROW_RIGHT: 
+				if (playerPos.first == DEF_CONSOLE_WIDTH - 2)playerPos.first++;
+				if (playerPos.first < DEF_CONSOLE_WIDTH - 2)playerPos.first += 2;
+
+				break;
+			}
+			Graphics::getInstance().gotoxy(playerPos.first, playerPos.second);std::cout << 'P';
+			InputRecord.Event.KeyEvent.wVirtualKeyCode = 0;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(25));
+
+		if (moveCD > std::chrono::steady_clock::now())continue;
+		moveCD = std::chrono::steady_clock::now() + std::chrono::milliseconds(1500);
+		if (currEnemy >= 0)enemies[currEnemy]->hideInfoBox();
+		enemyMove(enemies, cntEnemies, currEnemy);
+	}
+}
+
+void Engine::Play(Enemy &enemy)
+{
+	Graphics::getInstance().clearscreen();
+	std::cout << "BISH YOU GAY!\n";
+	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+	exit(0);
 }
