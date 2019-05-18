@@ -14,7 +14,6 @@ Engine::Engine()
 	Data::getIstance().loadEnemies();
 
 	srand((size_t)time(0));
-
 	cci.dwSize = 25;
 	//cci.bVisible = TRUE;
 	SetConsoleCursorInfo(hout, &cci);
@@ -23,7 +22,7 @@ Engine::Engine()
 
 Engine::~Engine()
 {
-
+	delete[] myPlayer;
 }
 
 Engine& Engine::getInstance()
@@ -93,6 +92,7 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int currEnemy)
 					}
 					enemies[i]->setXY(enemies[i]->getTLX() - 4, enemies[i]->getTLY());
 					enemies[i]->showBox();
+std::cout << enemies[i]->getHP().Curr;
 				}
 				break;
 			}
@@ -119,6 +119,7 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int currEnemy)
 					}
 					enemies[i]->setXY(enemies[i]->getTLX() + 4, enemies[i]->getTLY());
 					enemies[i]->showBox();
+std::cout << enemies[i]->getHP().Curr;
 				}
 				break;
 			}
@@ -145,6 +146,7 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int currEnemy)
 					}
 					enemies[i]->setXY(enemies[i]->getTLX(), enemies[i]->getTLY() - 1);
 					enemies[i]->showBox();
+std::cout << enemies[i]->getHP().Curr;
 				}
 				break;
 			}
@@ -171,6 +173,7 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int currEnemy)
 					}
 					enemies[i]->setXY(enemies[i]->getTLX(), enemies[i]->getTLY() + 1);
 					enemies[i]->showBox();
+std::cout << enemies[i]->getHP().Curr;
 				}
 				break;
 			}
@@ -456,10 +459,13 @@ void Engine::loadMap(EnemyBox **enemies, int &enemyCnt)
 	if (enemyCnt > MAX_ENEMY_CNT) exit(-1);
 	while (iFile) iFile >> enemyIDs[index++];index--;
 	iFile.close();
+	
 	for (int i = index;i < enemyCnt;i++) enemyIDs[i] = enemyIDs[rand() % index];
+	//for (int i = 0;i < enemyCnt;i++)std::cout << enemyIDs[i] << ' ';system("pause");
 	for (int i = 0;i < enemyCnt;i++)
 	{
 		enemies[i] = new EnemyBox(temp, *Data::getIstance().getEnemyByID(enemyIDs[i]), myPlayer->getLevel() + rand() % MAX_LEVEL_DIF);
+		//std::cout << enemies[i]->getHP().Max << ' ';system("pause");
 	}
 }
 
@@ -729,7 +735,7 @@ void Engine::Shop()
 			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
 			{
 			case 'L': if(cheatOn) myPlayer->gainXP(10); break;
-			case 'M': if(cheatOn) myPlayer->gainGold(10); break;
+			case 'M': if(cheatOn) myPlayer->gainGold(1000); break;
 			case 'H': t = 'H'; break;
 			case 'I': t = 'I'; break;
 			case 'P': t = 'P'; break;
@@ -941,8 +947,19 @@ void Engine::Map()
 	{
 		//Graphics::getInstance().gotoxy(0, 0);std::cout << coord.X << ' ' << coord.Y;
 		if (playerPos.first == 0 && playerPos.second == 0) Home();
-		for (int i = 0;i < cntEnemies;i++) if (enemies[i]->isWithin(playerPos.first, playerPos.second)) Play((Enemy&)enemies[i]);
-		
+		for (int i = 0;i < cntEnemies;i++)
+		{
+			if (enemies[i]->isWithin(playerPos.first, playerPos.second))
+			{
+				Enemy attackedEnemy = (Enemy)(*enemies[i]);
+				for (int j = 0;j < cntEnemies;j++)
+				{
+					delete[] enemies[j];
+				}
+				Play(attackedEnemy);
+			}
+
+		}
 		{//Mouse Hover
 			if (currEnemy == -1)
 			{
@@ -994,10 +1011,111 @@ void Engine::Map()
 	}
 }
 
-void Engine::Play(Enemy &enemy)
+void Engine::Play(Enemy enemy)
 {
-	Graphics::getInstance().clearscreen();
-	std::cout << "BISH YOU GAY!\n";
-	std::this_thread::sleep_for(std::chrono::milliseconds(3000));
-	exit(0);
+	char *text = new char[8];
+	char *temp = new char[7];
+	FloatingTexts playerFloatingDamageText(7, 6, 12, 10);
+	FloatingTexts enemyFloatingDamageText(7, 6, DEF_CONSOLE_WIDTH - 15, 10);
+	Damage playerDamage;
+	Damage enemyDamage;
+	myPlayer->setMaxHP();
+	enemy.setMaxHP();
+	Graphics::getInstance().drawPlay(*myPlayer, enemy);
+	for (int i = 0;i < 4;i++)
+	{
+		myPlayer->eqAbilities[i]->reduceCD(myPlayer->eqAbilities[i]->getCD());
+		myPlayer->eqAbilities[i]->setXY(DEF_CONSOLE_WIDTH - 2 * DEF_FREE_BEG + (i - 1) * (2 * DEF_ABILITY_SIZE + 2), DEF_CONSOLE_HEIGHT - DEF_ABILITY_SIZE - 1);
+		myPlayer->eqAbilities[i]->showBox(myPlayer->getTotalDamageStats());
+	}
+	std::chrono::steady_clock::time_point updateAnimations = std::chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point enemyMove = std::chrono::steady_clock::now();
+
+	while (myPlayer->isAlive() && enemy.isAlive())
+	{
+		if (InputRecord.Event.KeyEvent.bKeyDown/*InputRecord.EventType == KEY_EVENT*/)
+		{
+			switch (InputRecord.Event.KeyEvent.wVirtualKeyCode)
+			{
+				case '1': 
+				{
+					if (myPlayer->eqAbilities[0] == &Data::getIstance().emptyAbility)goto quitAttack;
+					playerDamage = myPlayer->dealDamage(0);
+					break;
+				}
+				case '2':
+				{
+					if (myPlayer->eqAbilities[1] == &Data::getIstance().emptyAbility)goto quitAttack;
+					playerDamage = myPlayer->dealDamage(1);
+					break;
+				}
+				case '3':
+				{
+					if (myPlayer->eqAbilities[2] == &Data::getIstance().emptyAbility)goto quitAttack;
+					playerDamage = myPlayer->dealDamage(2);
+					break;
+				}
+				case '4':
+				{
+					if (myPlayer->eqAbilities[3] == &Data::getIstance().emptyAbility)goto quitAttack;
+					playerDamage = myPlayer->dealDamage(3);
+					break;
+				}
+				default: goto quitAttack;
+			}
+			if (playerDamage.Physical + playerDamage.Magical <= 0)goto quitAttack;
+			enemy.gainDamage(playerDamage);
+			text[0] = '-';text[1] = 0;temp[0] = 0;
+			enemyFloatingDamageText.addText(strcat(text, _itoa(enemy.calcDamage(playerDamage), temp, 10)));
+			//InputRecord.EventType = MOUSE_EVENT;
+		}
+		quitAttack:
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		for (int i = 0;i < 4;i++)
+		{
+			if (myPlayer->eqAbilities[i]->getCDRem() > 0)
+			{
+				myPlayer->eqAbilities[i]->reduceCD(100);
+				myPlayer->eqAbilities[i]->showCD();
+			}
+		}
+		myPlayer->regenRes();
+		Graphics::getInstance().drawFrame(*myPlayer, 3, 3);
+
+		if (updateAnimations > std::chrono::steady_clock::now())continue;
+		updateAnimations += std::chrono::milliseconds(999);
+		playerFloatingDamageText.update();
+		playerFloatingDamageText.show(LightRed);
+		enemyFloatingDamageText.update();
+		enemyFloatingDamageText.show(LightRed);
+		Graphics::getInstance().drawFrame(*myPlayer, 3, 3);
+		Graphics::getInstance().drawFrame(enemy, DEF_CONSOLE_WIDTH - 25, 3);
+
+		if (enemyMove > std::chrono::steady_clock::now())continue;
+		enemyMove += std::chrono::milliseconds(2999);
+		
+		enemyDamage = enemy.dealDamage();
+		myPlayer->gainDamage(enemyDamage);
+		text[0] = '-';text[1] = 0;temp[0] = 0;
+		playerFloatingDamageText.addText(strcat(text,_itoa(myPlayer->calcDamage(enemyDamage), temp, 10)));
+	}
+	system("cls");
+	if (!myPlayer->isAlive())
+	{
+		std::cout << "You lost!\n";
+	}
+	else
+	{
+		std::cout << "You won!\n";
+	}
+	std::cout << "Press <H> to return to the home page!";
+	std::chrono::steady_clock::time_point skipTime = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+	while (InputRecord.Event.KeyEvent.wVirtualKeyCode!='h' && InputRecord.Event.KeyEvent.wVirtualKeyCode!='H')
+	{
+		if (std::chrono::steady_clock::now() >= skipTime)break;
+	}
+	delete[] temp;
+	delete[] text;
+	InputRecord.Event.KeyEvent.wVirtualKeyCode = 'z';
+	Home();
 }

@@ -30,12 +30,12 @@ public:
 	const char *getName()const;
 	const Bar &getHP()const;
 	const Bar &getRes()const;
+	void setMaxHP();
 	int getLevel()const;
 	int getXP()const;
 	int getGold()const;
 	bool gainXP(int XP);
 	void gainGold(int gold);
-	bool gainDamage(int damage);
 	bool isAlive()const;
 	
 	bool loadCharacter(const char *directory);
@@ -45,8 +45,9 @@ public:
 
 	virtual bool levelUp();
 	virtual void regenRes() = 0;
+	virtual bool gainDamage(const Damage &damage) = 0;
 	virtual int calcDamage(const Damage &damage)const = 0;
-	virtual Damage dealDamage(int slot)const = 0;
+	virtual Damage dealDamage(int slot) = 0;
 	virtual Damage getTotalDamageStats()const = 0;
 	virtual Defence getTotalDefenceStats()const = 0;
 };

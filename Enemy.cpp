@@ -90,6 +90,12 @@ void Enemy::regenRes()
 	return;
 }
 
+bool Enemy::gainDamage(const Damage &damage)
+{
+	HP.decreaseBy(calcDamage(damage));
+	return isAlive();
+}
+
 int Enemy::calcDamage(const Damage &damage)const
 {
 	int physical = damage.Physical - getTotalDefenceStats().Armor;
@@ -99,9 +105,9 @@ int Enemy::calcDamage(const Damage &damage)const
 	return physical + magical;
 }
 
-Damage Enemy::dealDamage(int slot)const
+Damage Enemy::dealDamage(int slot)
 {
-	return getTotalDamageStats();
+	return (getTotalDamageStats()*4)/5 + (getTotalDamageStats() * (rand() % 10)) / 50;
 }
 
 Damage Enemy::getTotalDamageStats()const

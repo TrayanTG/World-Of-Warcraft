@@ -4,6 +4,7 @@
 #include "Enemy.h"
 #include "Graphics.h"
 #include "Engine.h"
+#include "FloatingTexts.h"
 
 using namespace std;
 
@@ -14,8 +15,6 @@ int main()
 	
 	thread mouseThread(&Engine::updateCursor, &Engine::getInstance());
 	mouseThread.detach();
-
-	//Engine::getInstance().Map();
 
 	Engine::getInstance().Home();
 	while (true);

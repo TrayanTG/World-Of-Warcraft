@@ -100,6 +100,7 @@ bool Box::hideBox()const
 {
 	if (tlx < 0 || tly < 0 || tlx + 2 * size >= DEF_CONSOLE_WIDTH || tly + size >= DEF_CONSOLE_HEIGHT)return false;
 	Graphics::getInstance().clearBoarder(tlx, tly, tlx + 2 * size, tly + size);
+	return true;
 }
 
 bool Box::toggleInfoBox()const

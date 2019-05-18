@@ -38,8 +38,9 @@ public:
 
 	virtual void regenRes() = 0;
 	virtual bool levelUp();
+	virtual bool gainDamage(const Damage &damage);
 	virtual int calcDamage(const Damage &damage)const;
-	virtual Damage dealDamage(int slot)const;
+	virtual Damage dealDamage(int slot);
 	virtual Damage getTotalDamageStats()const;
 	virtual Defence getTotalDefenceStats()const;
 };

@@ -86,8 +86,8 @@ const Bar DEF_PALADIN_STARTER_RES = { 3,0 };
 
 const int ENEMY_WOLF = 0;
 const int ENEMY_MURLOC = 1;
-const int ENEMY_WITCH = 2;
-const int ENEMY_SKELETON = 3;
+const int ENEMY_WITCH = 3;
+const int ENEMY_SKELETON = 2;
 const int ENEMY_HOGGER = 4;
 const int ENEMY_SWINE = 5;
 const int ENEMY_FLATTUSK = 6;

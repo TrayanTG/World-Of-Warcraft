@@ -28,7 +28,7 @@ Character::Character(const Damage &damage, const Defence &defence, const char *n
 }
 
 Character::Character(const Character &other):
-	damage(other.damage), defence(other.defence), HP(HP), res(res)
+	damage(other.damage), defence(other.defence), HP(other.HP), res(other.res)
 {
 	name = new char[strlen(other.name) + 1];
 	strcpy(name, other.name);
@@ -96,6 +96,11 @@ const Bar &Character::getRes()const
 	return res;
 }
 
+void Character::setMaxHP()
+{
+	HP.Curr = HP.Max;
+}
+
 int Character::getLevel()const
 {
 	return level;
@@ -126,12 +131,6 @@ bool Character::gainXP(int XP)
 	if (level >= MAX_LEVEL) return false;
 	this->XP += XP;
 	return levelUp();
-}
-
-bool Character::gainDamage(int damage)
-{
-	HP.decreaseBy(damage);
-	return isAlive();
 }
 
 void Character::gainGold(int gold)

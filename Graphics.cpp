@@ -1,7 +1,8 @@
-#include "Graphics.h"
+﻿#include "Graphics.h"
 
 #include "Engine.h"
 #include "Data.h"
+#include "PlayerClasses.h"
 
 Graphics Graphics::s;
 
@@ -20,13 +21,13 @@ void Graphics::gotoxy(int x, int y)
 	return;
 }
 
-void Graphics::setcolor(Colour colour)
+void Graphics::setcolor(Colour foreground, Colour background)
 {
 	/*
 	Black, Blue, Green, Cyan, Red, Magenta, Yellow, LightGray, DarkGray,
 	LightBlue, LightGreen, LightCyan, LightRed, LightMagenta, LightYellow, White
 	*/
-	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), colour);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), foreground + 16 * background);
 	return;
 }
 
@@ -136,6 +137,53 @@ Graphics::~Graphics()
 
 }
 
+bool Graphics::drawGrass(int tlx, int tly, int brx, int bry)
+{
+	if (tlx < 0 || tly < 0 || brx > DEF_CONSOLE_WIDTH || bry > DEF_CONSOLE_HEIGHT)return false;
+	for (int i = tly;i < bry;i++)
+	{
+		gotoxy(tlx, i);
+		for (int j = tlx;j < brx;j++)
+		{
+			int t = rand() % 80;
+			if (t < 70)
+			{
+				std::cout << ' ';
+			}
+			else if (t < 73 && j < brx - 2)
+			{
+				std::cout << "\\/";j++;
+			}
+			else if (t < 75 && j < brx - 6)
+			{
+				std::cout << "..--..";j += 5;
+			}
+			else if (t < 79)
+			{
+				std::cout << '.';
+			}
+			else
+			{
+				std::cout << '_';
+			}
+		}
+	}
+	setcolor(White);
+	return true;
+}
+
+bool Graphics::drawCloud(int tlx, int tly)
+{
+	if (tlx < 0 || tly < 0 || tlx + 36 >= DEF_CONSOLE_WIDTH || tly + 6 >= DEF_CONSOLE_HEIGHT) return false;
+	gotoxy(tlx + 17, tly + 0);std::cout << ",---.";
+	gotoxy(tlx + 16, tly + 1);std::cout << "(     )";
+	gotoxy(tlx + 14, tly + 2);std::cout << "_.-'  _'-. _";
+	gotoxy(tlx + 8, tly + 3);std::cout << ",---.(     (    ) ),--.";
+	gotoxy(tlx + 1, tly + 4);std::cout << "_.----(                       )-._";
+	gotoxy(tlx + 0, tly + 5);std::cout << "(__________________________________)";
+	return true;
+}
+
 bool Graphics::drawBoarder(int tlx, int tly, int brx, int bry)
 {
 	if (tlx >= brx || tly >= bry) return false;
@@ -183,31 +231,36 @@ bool Graphics::drawButton(const Button &button)
 	return true;
 }
 
-bool Graphics::drawFrame(const char *name, int level, const Bar &HP, const Bar &res, Colour col, int tlx, int tly)
+bool Graphics::drawFrame(const Character &character, int tlx, int tly)
 {
 	if (tlx < 0 || tly < 0 || tlx + DEF_FRAME_WIDTH >= DEF_CONSOLE_WIDTH || tly + DEF_FRAME_HEIGHT >= DEF_CONSOLE_HEIGHT)return false;
 	clearBoarder(tlx, tly, tlx + DEF_FRAME_WIDTH, tly + DEF_FRAME_HEIGHT);
 	drawBoarder(tlx, tly, tlx + DEF_FRAME_WIDTH, tly + DEF_FRAME_HEIGHT);
 	gotoxy(tlx + 1, tly + 1);
-	std::cout << name << " (" << level << ')';
+	std::cout << character.getName() << " (" << character.getLevel() << ')';
 	//-----
 	gotoxy(tlx + 1, tly + 2);
 	setcolor(LightRed);
-	std::cout << HP.Curr << "    ";
+	std::cout << character.getHP().Curr << "    ";
 	gotoxy(tlx + DEF_FRAME_WIDTH - 4, tly+2);
-	if (HP.Max < 1000)std::cout << ' ';
-	if (HP.Max < 100)std::cout << ' ';
-	if (HP.Max < 10)std::cout << ' ';
-	std::cout << HP.Max;
+	if (character.getHP().Max < 1000)std::cout << ' ';
+	if (character.getHP().Max < 100)std::cout << ' ';
+	if (character.getHP().Max < 10)std::cout << ' ';
+	std::cout << character.getHP().Max;
 	//-----
 	gotoxy(tlx + 1, tly + 3);
-	setcolor(col);
-	std::cout << res.Curr << "    ";
+	
+	if (typeid(character) == typeid(Warrior))setcolor(Yellow);
+	else if (typeid(character) == typeid(Mage))setcolor(LightBlue);
+	else if (typeid(character) == typeid(Paladin))setcolor(Magenta);
+	else setcolor(Black);
+
+	std::cout << character.getRes().Curr << "    ";
 	gotoxy(tlx + DEF_FRAME_WIDTH - 4, tly + 3);
-	if (res.Max < 1000)std::cout << ' ';
-	if (res.Max < 100)std::cout << ' ';
-	if (res.Max < 10)std::cout << ' ';
-	std::cout << res.Max;
+	if (character.getRes().Max < 1000)std::cout << ' ';
+	if (character.getRes().Max < 100)std::cout << ' ';
+	if (character.getRes().Max < 10)std::cout << ' ';
+	std::cout << character.getRes().Max;
 
 	setcolor(White);
 	return true;
@@ -272,6 +325,11 @@ bool Graphics::drawPlayer(const Player &player, int tlx, int tly)
 	return true;
 }
 
+bool Graphics::drawEnemy(const Enemy &enemy, int tlx, int tly)
+{
+	return false;
+}
+
 bool Graphics::drawCharacterInfo(const Player &player, int tlx, int tly)
 {
 	if (tlx < 0 || tly < 0 || false || false)return false;
@@ -314,14 +372,19 @@ void Graphics::drawHelmet(const Armor *helmet, int tlx, int tly)
 	else if (helmet->getMinLevel() < 6)setcolor(LightYellow);
 	else if (helmet->getMinLevel() < 8)setcolor(LightCyan);
 	else setcolor(LightMagenta);
-	gotoxy(tlx, tly + 0);std::cout << " ******* ";
-	gotoxy(tlx, tly + 1);std::cout << "*       *";
-	gotoxy(tlx, tly + 2);std::cout << "*       *";
-	gotoxy(tlx, tly + 3);std::cout << "*       *";
-	gotoxy(tlx, tly + 4);std::cout << " ******* ";
+	gotoxy(tlx + 1, tly + 0);std::cout <<  "*******";
+	gotoxy(tlx + 0, tly + 1);std::cout << "*";
+	gotoxy(tlx + 8, tly + 1);std::cout << "*";
+	gotoxy(tlx + 0, tly + 2);std::cout << "*";
+	gotoxy(tlx + 8, tly + 2);std::cout << "*";
+	gotoxy(tlx + 0, tly + 3);std::cout << "*";
+	gotoxy(tlx + 8, tly + 3);std::cout << "*";
+	gotoxy(tlx + 1, tly + 4);std::cout << "*******";
 
 	setcolor(White);
-	gotoxy(tlx + 2, tly + 1);std::cout << "*   *";
+
+	gotoxy(tlx + 2, tly + 1);std::cout << '*';
+	gotoxy(tlx + 6, tly + 1);std::cout << '*';
 	gotoxy(tlx + 3, tly + 3);std::cout << "***";
 }
 
@@ -333,12 +396,12 @@ void Graphics::drawShoulders(const Armor *shoulders, int tlx, int tly)
 	else if (shoulders->getMinLevel() < 6)setcolor(LightYellow);
 	else if (shoulders->getMinLevel() < 8)setcolor(LightCyan);
 	else setcolor(LightMagenta);
-	gotoxy(tlx, tly + 0);std::cout << " *****";
-	gotoxy(tlx, tly + 1);std::cout << "******";
-	gotoxy(tlx, tly + 2);std::cout << "****  ";
-	gotoxy(tlx + 17, tly + 0);std::cout << "***** ";
+	gotoxy(tlx + 01, tly + 0);std::cout << "*****";
+	gotoxy(tlx + 00, tly + 1);std::cout << "******";
+	gotoxy(tlx + 00, tly + 2);std::cout << "****";
+	gotoxy(tlx + 17, tly + 0);std::cout << "*****";
 	gotoxy(tlx + 17, tly + 1);std::cout << "******";
-	gotoxy(tlx + 17, tly + 2);std::cout << "  ****";
+	gotoxy(tlx + 19, tly + 2);std::cout << "****";
 	setcolor(White);
 }
 
@@ -372,12 +435,12 @@ void Graphics::drawGloves(const Armor *gloves, int tlx, int tly)
 	gotoxy(tlx, tly + 1);std::cout << "****";
 	gotoxy(tlx, tly + 2);std::cout << "****";
 	gotoxy(tlx, tly + 3);std::cout << "****";
-	gotoxy(tlx, tly + 4);std::cout << "||||";
+	gotoxy(tlx, tly + 4);std::cout << "****";
 	gotoxy(tlx + 19, tly + 0);std::cout << "****";
 	gotoxy(tlx + 19, tly + 1);std::cout << "****";
 	gotoxy(tlx + 19, tly + 2);std::cout << "****";
 	gotoxy(tlx + 19, tly + 3);std::cout << "****";
-	gotoxy(tlx + 19, tly + 4);std::cout << "||||";
+	gotoxy(tlx + 19, tly + 4);std::cout << "****";
 	setcolor(White);
 }
 
@@ -389,12 +452,15 @@ void Graphics::drawLegs(const Armor *legs, int tlx, int tly)
 	else if (legs->getMinLevel() < 6)setcolor(LightYellow);
 	else if (legs->getMinLevel() < 8)setcolor(LightCyan);
 	else setcolor(LightMagenta);
-	gotoxy(tlx, tly + 0);std::cout << " =========== ";
-	gotoxy(tlx, tly + 1);std::cout << "*************";
-	gotoxy(tlx, tly + 2);std::cout << "*************";
-	gotoxy(tlx, tly + 3);std::cout << "****** ******";
-	gotoxy(tlx, tly + 4);std::cout << "*****   *****";
-	gotoxy(tlx, tly + 5);std::cout << "*****   *****";
+	gotoxy(tlx + 0, tly + 0);std::cout << "=============";
+	gotoxy(tlx + 0, tly + 1);std::cout << "*************";
+	gotoxy(tlx + 0, tly + 2);std::cout << "*************";
+	gotoxy(tlx + 0, tly + 3);std::cout << "******";
+	gotoxy(tlx + 7, tly + 3);std::cout << "******";
+	gotoxy(tlx + 0, tly + 4);std::cout << "*****";
+	gotoxy(tlx + 8, tly + 4);std::cout << "*****";
+	gotoxy(tlx + 0, tly + 5);std::cout << "*****";
+	gotoxy(tlx + 8, tly + 5);std::cout << "*****";
 	setcolor(White);
 }
 
@@ -406,17 +472,21 @@ void Graphics::drawFeet(const Armor *feet, int tlx, int tly)
 	else if (feet->getMinLevel() < 6)setcolor(LightYellow);
 	else if (feet->getMinLevel() < 8)setcolor(LightCyan);
 	else setcolor(LightMagenta);
-	gotoxy(tlx, tly + 0);std::cout << "  *****   *****  ";
-	gotoxy(tlx, tly + 1);std::cout << "  *****   *****  ";
-	gotoxy(tlx, tly + 2);std::cout << "*******   *******";
-	gotoxy(tlx, tly + 3);std::cout << "*******   *******";
+	gotoxy(tlx + 02, tly + 0);std::cout << "*****";
+	gotoxy(tlx + 10, tly + 0);std::cout << "*****";
+	gotoxy(tlx + 02, tly + 1);std::cout << "*****";
+	gotoxy(tlx + 10, tly + 1);std::cout << "*****";
+	gotoxy(tlx + 00, tly + 2);std::cout << "*******";
+	gotoxy(tlx + 10, tly + 2);std::cout << "*******";
+	gotoxy(tlx + 00, tly + 3);std::cout << "*******";
+	gotoxy(tlx + 10, tly + 3);std::cout << "*******";
 	setcolor(White);
 }
 
 void Graphics::drawAxe(int tlx, int tly)
 {
-	gotoxy(tlx + 1, tly + 0);std::cout << "  /\\  ";
-	gotoxy(tlx + 1, tly + 1);std::cout << " /  \\ ";
+	gotoxy(tlx + 3, tly + 0);std::cout << "/\\";
+	gotoxy(tlx + 2, tly + 1);std::cout << "/  \\";
 	gotoxy(tlx + 1, tly + 2);std::cout << "/    \\";
 	gotoxy(tlx + 1, tly + 3);std::cout << "|    |";
 	gotoxy(tlx + 1, tly + 4);std::cout << "|    |";
@@ -433,20 +503,24 @@ void Graphics::drawAxe(int tlx, int tly)
 
 void Graphics::drawStaff(int tlx, int tly)
 {
-	gotoxy(tlx + 0, tly + 0);std::cout << "  **** ";
-	gotoxy(tlx + 0, tly + 1);std::cout << " *    *";
-	gotoxy(tlx + 0, tly + 2);std::cout << "*     *";
-	gotoxy(tlx + 0, tly + 3);std::cout << "*     *";
-	gotoxy(tlx + 0, tly + 4);std::cout << " *    *";
-	gotoxy(tlx + 0, tly + 5);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 6);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 7);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 8);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 8);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 9);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 10);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 11);std::cout << "      *";
-	gotoxy(tlx + 0, tly + 12);std::cout << "      *";
+	gotoxy(tlx + 2, tly + 0);std::cout << (char)219 << (char)219 << (char)219 << (char)219;
+	gotoxy(tlx + 1, tly + 1);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 1);std::cout << (char)219;
+	gotoxy(tlx + 0, tly + 2);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 2);std::cout << (char)219;
+	gotoxy(tlx + 0, tly + 3);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 3);std::cout << (char)219;
+	gotoxy(tlx + 1, tly + 4);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 4);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 5);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 6);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 7);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 8);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 8);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 9);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 10);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 11);std::cout << (char)219;
+	gotoxy(tlx + 6, tly + 12);std::cout << (char)219;
 }
 
 void Graphics::drawClassChooseUI()
@@ -554,6 +628,21 @@ void Graphics::drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int e
 	std::cout << 'P';
 	for (int i = 0;i < enemyCnt;i++)
 	{
-		/*if(enemies[i]->getHP().Curr>0)*/enemies[i]->showBox();//std::cout << i;
+		if(enemies[i]->getHP().Max>0)
+		enemies[i]->showBox();//std::cout << enemies[i]->getHP().Curr;
 	}
+}
+
+void Graphics::drawPlay(const Player &player, const Enemy &enemy)
+{
+	clearscreen();
+	gotoxy(0, 22);for (int i = 0;i < DEF_CONSOLE_WIDTH;i++)std::cout << (char)126;//196;
+	drawGrass(0, 23, DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT);
+	drawCloud(40, 0);
+	drawCloud(94, 4);
+	
+	drawPlayer(player, 0, 15);
+	drawEnemy(enemy, DEF_CONSOLE_WIDTH - 38, 12);
+	drawFrame(player, 3, 3);
+	drawFrame(enemy, DEF_CONSOLE_WIDTH - 25, 3);
 }

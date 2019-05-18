@@ -38,14 +38,18 @@ public:
 
 	void init();
 	void gotoxy(int x, int y);
-	void setcolor(Colour colour);
+	void setcolor(Colour foreground, Colour background = Black);
 	void clearscreen();
+
+	bool drawGrass(int tlx, int tly, int brx, int bry);
+	bool drawCloud(int tlx, int tly);
 
 	bool drawBoarder(int tlx, int tly, int brx, int bry);
 	bool clearBoarder(int tlx, int tly, int brx, int bry);
 	bool drawButton(const Button &button);
-	bool drawFrame(const char *name, int level, const Bar &HP, const Bar &res, Colour col, int tlx, int tly);
+	bool drawFrame(const Character &character, int tlx, int tly);
 	bool drawPlayer(const Player &player, int tlx, int tly);
+	bool drawEnemy(const Enemy &enemy, int tlx, int tly);
 	bool drawPlayerUI(const Player &player, int tlx, int tly);
 	bool drawCharacterInfo(const Player &player, int tlx, int tly);
 	void drawHomeUI(const Player &player);
@@ -53,6 +57,7 @@ public:
 	void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem);
 	void drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4);
 	void drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt);
+	void drawPlay(const Player &player, const Enemy &enemy);
 
 	void drawClassChooseUI();
 	void drawMapChooseUI();

@@ -264,7 +264,7 @@ bool Player::equipAbility(Ability *eqAbility, int slot)
 	return true;
 }
 
-Damage Player::dealDamage(int slot)const
+Damage Player::dealDamage(int slot)
 {
 	int power = eqAbilities[slot]->getPower();
 	if (power == -1)return { 0,0 };
@@ -283,6 +283,12 @@ bool Player::levelUp()
 		}
 	}
 	return true;
+}
+
+bool Player::gainDamage(const Damage &damage)
+{
+	HP.decreaseBy(calcDamage(damage));
+	return isAlive();
 }
 
 int Player::calcDamage(const Damage &damage)const

@@ -3,7 +3,8 @@
 #include "HeadersAndConsts.h"
 #include "Graphics.h"
 #include "EnemyBox.h"
-
+#include "FloatingTexts.h"
+#include "PlayerClasses.h"
 
 class Engine
 {public:
@@ -16,7 +17,7 @@ class Engine
 	DWORD Events;
 	COORD coord = { 0, 0 };
 	CONSOLE_CURSOR_INFO cci;
-
+	
 	Engine();
 
 	Player *myPlayer;
@@ -49,5 +50,5 @@ public:
 	void Shop();
 	void AbilityBook();
 	void Map();
-	void Play(Enemy &enemy);
+	void Play(Enemy enemy);
 };

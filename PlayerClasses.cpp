@@ -26,7 +26,11 @@ void Warrior::regenRes()
 
 Damage Warrior::dealDamage(int slot)
 {
-	return { ((100 + res.Curr)*Player::dealDamage(slot).Physical) / 100,((100 + res.Curr)*Player::dealDamage(slot).Magical) / 100 };
+	Damage damage = Player::dealDamage(slot);
+	//std::cout << damage.Physical << ' ' << damage.Magical;system("pause");
+	if (damage.Physical + damage.Magical <= 0)return { -1,-1 };
+	res.increaseBy(eqAbilities[slot]->getResReq() / 3); //could be increased somewhere else as well!
+	return { ((100 + res.Curr) * damage.Physical) / 100, damage.Magical };
 }
 
 // --------------------------------------------------
@@ -56,7 +60,11 @@ void Mage::regenRes()
 
 Damage Mage::dealDamage(int slot)
 {
-	return Player::dealDamage(slot);
+	if (eqAbilities[slot]->getResReq() > res.Curr) return { -1,-1 };
+	Damage damage = Player::dealDamage(slot);
+	if (damage.Physical + damage.Magical <= 0)return { -1,-1 };
+	res.decreaseBy(eqAbilities[slot]->getResReq()); //could be increased somewhere else as well!
+	return { damage.Physical, 2 * damage.Magical };
 }
 
 // --------------------------------------------------
@@ -81,12 +89,12 @@ bool Paladin::levelUp()
 
 bool Paladin::gainCombo()
 {
-	res.increaseBy(DEF_COMBO_INCR_RATE);
-	if (res.Curr >= res.Max)
+	if (res.Curr == res.Max)
 	{
 		res.decreaseBy(res.Max);
 		return true;
 	}
+	else res.increaseBy(DEF_COMBO_INCR_RATE);
 	return false;
 }
 
@@ -97,11 +105,11 @@ void Paladin::regenRes()
 
 Damage Paladin::dealDamage(int slot)
 {
-	Damage temp = Player::dealDamage(slot);
-	if (temp.Physical + temp.Magical <= 0)return { 0,0 };
+	Damage damage = Player::dealDamage(slot);
+	if (damage.Physical + damage.Magical <= 0)return { -1,-1 };
 	if (gainCombo())
 	{
-		return { 2 * temp.Physical, 2 * temp.Magical };
+		return { (3 * damage.Physical) / 2, (3 * damage.Magical) / 2 };
 	}
-	return temp;
+	return damage;
 }

@@ -57,9 +57,11 @@ int Ability::getID()const
 
 int Ability::getPower()
 {
-	if (cdRem > 0)return -1;
+	//std::cout << cdRem;system("pause");
+	if (cdRem > 0)return -1000;
 	cdRem = cd;
-	return minPower + rand()%(maxPower - minPower) + 1;
+	//std::cout << minPower << ' ' << maxPower;system("pause");
+	return minPower + rand()%(maxPower - minPower + 1) + 1;
 }
 
 int Ability::getCDRem()const
