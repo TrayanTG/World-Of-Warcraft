@@ -11,9 +11,6 @@ class Graphics
 {
 	static Graphics s;
 
-	void SetConsoleWindowSize(short x, short y);
-	void setFontSize(int size);
-
 	Graphics();
 
 	void drawHelmet(const Armor *helmet, int tlx, int tly);
@@ -26,7 +23,6 @@ class Graphics
 	void drawAxe(int tlx, int tly);
 	void drawWeapon(const Weapon *weapon, int tlx, int tly);
 
-
 public:
 
 	Graphics(const Graphics&) = delete;
@@ -37,10 +33,13 @@ public:
 	static Graphics& getInstance();
 
 	void init();
-	void gotoxy(int x, int y);
+	void gotoxy(int x, int y)const;
 	void setcolor(Colour foreground, Colour background = Black);
 	void clearscreen();
+	void SetConsoleWindowSize(short x, short y);
+	void setFontSize(int size);
 
+	bool drawPrecisely(char **text, int tlx, int tly, int width, int height)const;
 	bool drawGrass(int tlx, int tly, int brx, int bry);
 	bool drawCloud(int tlx, int tly);
 
@@ -49,7 +48,7 @@ public:
 	bool drawButton(const Button &button);
 	bool drawFrame(const Character &character, int tlx, int tly);
 	bool drawPlayer(const Player &player, int tlx, int tly);
-	bool drawEnemy(const Enemy &enemy, int tlx, int tly);
+	bool drawEnemy(const Enemy &enemy, int tlx, int tly)const;
 	bool drawPlayerUI(const Player &player, int tlx, int tly);
 	bool drawCharacterInfo(const Player &player, int tlx, int tly);
 	void drawHomeUI(const Player &player);

@@ -44,6 +44,7 @@ public:
 	bool saveCharacter(std::ofstream &oFile);
 
 	virtual bool levelUp();
+	virtual void resetRes() = 0;
 	virtual void regenRes() = 0;
 	virtual bool gainDamage(const Damage &damage) = 0;
 	virtual int calcDamage(const Damage &damage)const = 0;

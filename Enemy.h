@@ -18,13 +18,14 @@ public:
 	Enemy(std::ifstream &iFile);
 	~Enemy();
 
-	int getID();
+	int getID()const;
 	void setLevel(int level);
 
 	bool loadEnemy(std::ifstream &iFile);
 	bool saveEnemy(std::ofstream &oFile);
 
 	virtual bool levelUp();
+	virtual void resetRes();
 	virtual void regenRes();
 	virtual bool gainDamage(const Damage &damage);
 	virtual int calcDamage(const Damage &damage)const;

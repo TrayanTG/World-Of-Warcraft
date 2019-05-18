@@ -444,15 +444,17 @@ void Engine::loadMap(EnemyBox **enemies, int &enemyCnt)
 	Graphics::getInstance().drawMapChooseUI();
 	do
 	{
+		//std::cout << (char)InputRecord.Event.KeyEvent.wVirtualKeyCode;
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		chooseMap = (char)InputRecord.Event.KeyEvent.wVirtualKeyCode;
 		if (chooseMap >= 'a')chooseMap -= ('a' - 'A');
-	} while (chooseMap != 'E' && chooseMap != 'D' && chooseMap != 'B');
+	} while (chooseMap != 'E' && chooseMap != 'D' && chooseMap != 'I');
 	// ---------------------------------------------
 	std::ifstream iFile;
 	strcpy(path, "Data/Maps/");
 	if (chooseMap == 'E')strcat(path, "ElwynnForest");
 	else if (chooseMap == 'D')strcat(path, "Durotar");
-	else strcat(path, "BossLands");
+	else strcat(path, "IsleOfGiants");
 	iFile.open(path);
 	if (!iFile) exit(-1);
 	iFile >> enemyCnt;
@@ -679,6 +681,7 @@ void Engine::Shop()
 	{
 		if (InputRecord.Event.MouseEvent.dwButtonState == FROM_LEFT_1ST_BUTTON_PRESSED)
 		{
+			std::cout << "here";
 			if (markedBox == -1)
 			{
 				for (int i = invBoxes;i < cntBoxes;i++)
@@ -1020,6 +1023,7 @@ void Engine::Play(Enemy enemy)
 	Damage playerDamage;
 	Damage enemyDamage;
 	myPlayer->setMaxHP();
+	myPlayer->resetRes();
 	enemy.setMaxHP();
 	Graphics::getInstance().drawPlay(*myPlayer, enemy);
 	for (int i = 0;i < 4;i++)
@@ -1031,6 +1035,7 @@ void Engine::Play(Enemy enemy)
 	std::chrono::steady_clock::time_point updateAnimations = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point enemyMove = std::chrono::steady_clock::now();
 
+	// Battle
 	while (myPlayer->isAlive() && enemy.isAlive())
 	{
 		if (InputRecord.Event.KeyEvent.bKeyDown/*InputRecord.EventType == KEY_EVENT*/)
@@ -1099,7 +1104,11 @@ void Engine::Play(Enemy enemy)
 		text[0] = '-';text[1] = 0;temp[0] = 0;
 		playerFloatingDamageText.addText(strcat(text,_itoa(myPlayer->calcDamage(enemyDamage), temp, 10)));
 	}
-	system("cls");
+	
+	// Results
+	Graphics::getInstance().setFontSize(DEF_CONSOLE_SIZE * 2);
+	Graphics::getInstance().SetConsoleWindowSize(DEF_CONSOLE_WIDTH / 2, DEF_CONSOLE_HEIGHT / 2);
+	Graphics::getInstance().clearscreen();
 	if (!myPlayer->isAlive())
 	{
 		std::cout << "You lost!\n";
@@ -1107,6 +1116,15 @@ void Engine::Play(Enemy enemy)
 	else
 	{
 		std::cout << "You won!\n";
+		std::cout << "You received " << enemy.getGold() << " gold\n";
+		myPlayer->gainGold(enemy.getGold());
+		std::cout << "You received " << enemy.getXP() << " XP\n";
+		int currGold = myPlayer->getGold();
+		if (myPlayer->gainXP(enemy.getXP()))
+		{
+			std::cout << "You reaced " << myPlayer->getLevel() << " level!\n";
+			std::cout << "You received bonus " << myPlayer->getGold() - currGold << " gold!\n";
+		}
 	}
 	std::cout << "Press <H> to return to the home page!";
 	std::chrono::steady_clock::time_point skipTime = std::chrono::steady_clock::now() + std::chrono::seconds(30);
@@ -1117,5 +1135,13 @@ void Engine::Play(Enemy enemy)
 	delete[] temp;
 	delete[] text;
 	InputRecord.Event.KeyEvent.wVirtualKeyCode = 'z';
+	for (int i = 0;i < 4;i++)
+	{
+		myPlayer->eqAbilities[i]->reduceCD(myPlayer->eqAbilities[i]->getCD());
+		myPlayer->eqAbilities[i]->hideBox();
+		myPlayer->eqAbilities[i]->setXY(-1, -1);
+	}
+	Graphics::getInstance().setFontSize(DEF_CONSOLE_SIZE);
+	Graphics::getInstance().SetConsoleWindowSize(DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT);
 	Home();
 }

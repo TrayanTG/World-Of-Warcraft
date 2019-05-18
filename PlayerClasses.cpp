@@ -21,7 +21,12 @@ bool Warrior::levelUp()
 
 void Warrior::regenRes()
 {
-	res.decreaseBy(DEF_REGEN_RATE);
+	res.decreaseBy(((2*res.Curr)/res.Max + 1)*DEF_REGEN_RATE);
+}
+
+void Warrior::resetRes()
+{
+	res.Curr = 0;
 }
 
 Damage Warrior::dealDamage(int slot)
@@ -29,7 +34,7 @@ Damage Warrior::dealDamage(int slot)
 	Damage damage = Player::dealDamage(slot);
 	//std::cout << damage.Physical << ' ' << damage.Magical;system("pause");
 	if (damage.Physical + damage.Magical <= 0)return { -1,-1 };
-	res.increaseBy(eqAbilities[slot]->getResReq() / 3); //could be increased somewhere else as well!
+	res.increaseBy(eqAbilities[slot]->getResReq() / 2); //could be increased somewhere else as well!
 	return { ((100 + res.Curr) * damage.Physical) / 100, damage.Magical };
 }
 
@@ -56,6 +61,11 @@ bool Mage::levelUp()
 void Mage::regenRes()
 {
 	res.increaseBy(DEF_REGEN_RATE);
+}
+
+void Mage::resetRes()
+{
+	res.Curr = res.Max;
 }
 
 Damage Mage::dealDamage(int slot)
@@ -100,7 +110,12 @@ bool Paladin::gainCombo()
 
 void Paladin::regenRes()
 {
+	return;
+}
 
+void Paladin::resetRes()
+{
+	res.Curr = 0;
 }
 
 Damage Paladin::dealDamage(int slot)

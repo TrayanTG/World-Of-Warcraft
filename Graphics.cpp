@@ -13,7 +13,7 @@ Graphics& Graphics::getInstance()
 
 // --------------------------------------------------------------------------------
 
-void Graphics::gotoxy(int x, int y)
+void Graphics::gotoxy(int x, int y)const
 {
 	COORD coord;
 	coord.X = x; coord.Y = y;
@@ -137,6 +137,25 @@ Graphics::~Graphics()
 
 }
 
+bool Graphics::drawPrecisely(char **text, int tlx, int tly, int width, int height)const
+{
+	if (tlx < 0 || tly < 0 || width < 0 || height < 0 || tlx + width >= DEF_CONSOLE_WIDTH || tly + height >= DEF_CONSOLE_HEIGHT) return false;
+
+	for (int i = 0;i < height;i++)
+	{
+		for (int j = 0; text[i][j]; j++)
+		{
+			if (text[i][j] != '%')
+			{
+				gotoxy(j + tlx, i + tly);
+				std::cout << text[i][j];
+			}
+		}
+	}
+
+	return true;
+}
+
 bool Graphics::drawGrass(int tlx, int tly, int brx, int bry)
 {
 	if (tlx < 0 || tly < 0 || brx > DEF_CONSOLE_WIDTH || bry > DEF_CONSOLE_HEIGHT)return false;
@@ -152,18 +171,22 @@ bool Graphics::drawGrass(int tlx, int tly, int brx, int bry)
 			}
 			else if (t < 73 && j < brx - 2)
 			{
+				setcolor(LightGreen);
 				std::cout << "\\/";j++;
 			}
 			else if (t < 75 && j < brx - 6)
 			{
+				setcolor(Red);
 				std::cout << "..--..";j += 5;
 			}
 			else if (t < 79)
 			{
+				setcolor(Red);
 				std::cout << '.';
 			}
 			else
 			{
+				setcolor(Red);
 				std::cout << '_';
 			}
 		}
@@ -325,9 +348,28 @@ bool Graphics::drawPlayer(const Player &player, int tlx, int tly)
 	return true;
 }
 
-bool Graphics::drawEnemy(const Enemy &enemy, int tlx, int tly)
+bool Graphics::drawEnemy(const Enemy &enemy, int tlx, int tly)const
 {
-	return false;
+	char path[MAX_PATH_LENGHT], id[MAX_ID_LENGHT];
+	int height = 0, width = 0;
+	strcpy(path, "Data/Enemies/Graphics/");
+	std::ifstream iFile(strcat(path, _itoa(enemy.getID(), id, 10)));
+	if (!iFile) return false;
+
+	char **enemyLook = new char*[DEF_ENEMY_HEIGHT];
+	for (int i = 0;i < DEF_ENEMY_HEIGHT;i++) enemyLook[i] = new char[DEF_ENEMY_WIDTH + 1];
+	while (iFile)
+	{
+		iFile.getline(enemyLook[height], DEF_ENEMY_WIDTH);
+		if (strlen(enemyLook[height]) > width) width = strlen(enemyLook[height]);
+		height++;
+	}
+	bool f = drawPrecisely(enemyLook, DEF_CONSOLE_WIDTH-1-width, DEF_CONSOLE_HEIGHT-height-1, width, height);
+	
+	for (int i = 0;i < DEF_ENEMY_HEIGHT;i++) delete[] enemyLook[i];
+	delete[] enemyLook;
+	iFile.close();
+	return f;
 }
 
 bool Graphics::drawCharacterInfo(const Player &player, int tlx, int tly)
@@ -544,7 +586,7 @@ void Graphics::drawMapChooseUI()
 	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 2);std::cout << "Choose map:";
 	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 1);std::cout << "-Elwynn Forest <E>";
 	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 - 0);std::cout << "-Durotar <D>";
-	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 + 1);std::cout << "-Boss Lands <B>";
+	gotoxy((DEF_CONSOLE_WIDTH / 2 - 18) / 2, DEF_CONSOLE_HEIGHT / 4 + 1);std::cout << "-Isle of Giants <I>";
 }
 
 void Graphics::drawNewOldUI()

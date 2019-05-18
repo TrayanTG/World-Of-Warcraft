@@ -65,6 +65,8 @@ const int DEF_COMBO_INCR_RATE = 1;
 const int DEF_STARTER_LEGGINGS_ID = 19;
 const int DEF_GOLD_PER_LEVEL = 100;
 const int DEF_FREE_BEG = DEF_CHARACTER_WIDTH + DEF_ITEM_SIZE * 2 + 2;
+const int DEF_ENEMY_WIDTH = 65;//37;
+const int DEF_ENEMY_HEIGHT = 25;
 
 
 const Damage DEF_WARRIOR_STARTER_DAMAGE = { 10,0 };
@@ -85,9 +87,9 @@ const Bar DEF_MAGE_STARTER_RES = { 100,100 };
 const Bar DEF_PALADIN_STARTER_RES = { 3,0 };
 
 const int ENEMY_WOLF = 0;
-const int ENEMY_MURLOC = 1;
+const int ENEMY_BEAR = 1;
+const int ENEMY_BISON = 2;
 const int ENEMY_WITCH = 3;
-const int ENEMY_SKELETON = 2;
 const int ENEMY_HOGGER = 4;
 const int ENEMY_SWINE = 5;
 const int ENEMY_FLATTUSK = 6;

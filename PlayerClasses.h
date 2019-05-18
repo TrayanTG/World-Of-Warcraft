@@ -9,6 +9,7 @@ public:
 
 	virtual bool levelUp();
 	virtual void regenRes();
+	virtual void resetRes();
 	virtual Damage dealDamage(int slot);
 };
 
@@ -20,6 +21,7 @@ public:
 
 	virtual bool levelUp();
 	virtual void regenRes();
+	virtual void resetRes();
 	virtual Damage dealDamage(int slot);
 };
 
@@ -32,5 +34,6 @@ public:
 
 	virtual bool levelUp();
 	virtual void regenRes();
+	virtual void resetRes();
 	virtual Damage dealDamage(int slot);
 };

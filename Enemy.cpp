@@ -45,7 +45,7 @@ void Enemy::setGold()
 	gold += (damage.Physical + damage.Magical + defence.Armor + defence.MagicResist + HP.Max / 20) / 5;
 }
 
-int Enemy::getID()
+int Enemy::getID()const
 {
 	return id;
 }
@@ -83,6 +83,11 @@ bool Enemy::saveEnemy(std::ofstream &oFile)
 bool Enemy::levelUp()
 {
 	return false;
+}
+
+void Enemy::resetRes()
+{
+	return;
 }
 
 void Enemy::regenRes()
