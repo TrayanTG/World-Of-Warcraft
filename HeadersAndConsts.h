@@ -70,6 +70,8 @@ const int DEF_FREE_BEG = DEF_CHARACTER_WIDTH + DEF_ITEM_SIZE * 2 + 2;
 const int DEF_ENEMY_WIDTH = 65;//37;
 const int DEF_ENEMY_HEIGHT = 25;
 
+const int TEMP_FIX = 2;
+
 
 const Damage DEF_WARRIOR_STARTER_DAMAGE = { 10,0 };
 const Damage DEF_MAGE_STARTER_DAMAGE = { 0,15 };

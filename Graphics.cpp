@@ -137,7 +137,7 @@ Graphics::~Graphics()
 
 }
 
-bool Graphics::drawPrecisely(char **text, int tlx, int tly, int width, int height)const
+bool Graphics::drawPrecisely(char **text, int tlx, int tly, int width, int height, char filler)const
 {
 	if (tlx < 0 || tly < 0 || width < 0 || height < 0 || tlx + width >= DEF_CONSOLE_WIDTH || tly + height >= DEF_CONSOLE_HEIGHT) return false;
 
@@ -145,7 +145,7 @@ bool Graphics::drawPrecisely(char **text, int tlx, int tly, int width, int heigh
 	{
 		for (int j = 0; text[i][j]; j++)
 		{
-			if (text[i][j] != '%')
+			if (text[i][j] != filler)
 			{
 				gotoxy(j + tlx, i + tly);
 				std::cout << text[i][j];
@@ -237,6 +237,50 @@ bool Graphics::drawCloud(int tlx, int tly)
 	gotoxy(tlx + 8, tly + 3);std::cout << ",---.(     (    ) ),--.";
 	gotoxy(tlx + 1, tly + 4);std::cout << "_.----(                       )-._";
 	gotoxy(tlx + 0, tly + 5);std::cout << "(__________________________________)";
+	return true;
+}
+
+bool Graphics::drawLogo(int tlx, int tly)
+{
+	std::ifstream iFile("Data/Graphics/Logo");
+	if (!iFile) return false;
+	int height, width;
+	iFile >> height >> width;
+	iFile.get();
+	char **text = new char*[height];
+	for (int i = 0;i < height;i++) text[i] = new char[width + 1];
+	int i = 0;
+	while (iFile)
+	{
+		iFile.getline(text[i++], width);
+	}
+	setcolor(Yellow);
+	drawPrecisely(text, tlx - width / 2, tly - height / 2, width, height, 'a');
+	setcolor(White);
+	for (int i = 0;i < height;i++)delete[] text[i];
+	delete[] text;
+	return true;
+}
+
+bool Graphics::drawFromFile(const char *directory, int tlx, int tly)
+{
+	std::ifstream iFile(directory);
+	if (!iFile) return false;
+	int height, width;
+	iFile >> height >> width;
+	iFile.get();
+	char **text = new char*[height];
+	for (int i = 0;i < height;i++) text[i] = new char[width + 1];
+	int i = 0;
+	while (iFile)
+	{
+		iFile.getline(text[i++], width);
+	}
+	setcolor(Yellow);
+	drawPrecisely(text, tlx - width / 2 + 3, tly, width, height, 'a');
+	setcolor(White);
+	for (int i = 0;i < height;i++)delete[] text[i];
+	delete[] text;
 	return true;
 }
 
@@ -666,10 +710,12 @@ void Graphics::drawInventoryUI(const Player &player, Box **boxes, int num, Butto
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1 + TEMP_FIX, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + TEMP_FIX);
 	equipItem.showButton();
 	sellItem.showButton();
 	drawBoxesInRange(boxes, num, tlx, tly, brx, bry);
+
+	if (tly <= 10)Graphics::getInstance().drawFromFile("Data/Graphics/InventoryLogo");
 }
 
 void Graphics::drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem, int tlx, int tly, int brx, int bry)
@@ -677,9 +723,11 @@ void Graphics::drawShopUI(const Player &player, Box **boxes, int num, Button &bu
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
+	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1 + TEMP_FIX, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + TEMP_FIX);
 	buyItem.showButton();
 	drawBoxesInRange(boxes, num, tlx, tly, brx, bry);
+
+	if (tly <= 10)Graphics::getInstance().drawFromFile("Data/Graphics/ShopLogo");
 }
 
 void Graphics::drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int tlx, int tly, int brx, int bry)
@@ -687,12 +735,14 @@ void Graphics::drawAbilityBookUI(const Player &player, Box **boxes, int num, But
 	int totalLenX = 6 * (DEF_ABILITY_SIZE + 1);
 	int totalLenY = 3 * (DEF_ABILITY_SIZE + 1);
 
-	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
+	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6 + 2 * TEMP_FIX + 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5 + 2 * TEMP_FIX + 1);
 	eqSlot1.showButton();
 	eqSlot2.showButton();
 	eqSlot3.showButton();
 	eqSlot4.showButton();
 	drawBoxesInRange(boxes, num, tlx, tly, brx, bry, player.getTotalDamageStats());
+
+	if (tly <= 10)Graphics::getInstance().drawFromFile("Data/Graphics/AbilityBookLogo");
 }
 
 void Graphics::drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt)

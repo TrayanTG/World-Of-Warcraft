@@ -39,11 +39,14 @@ public:
 	void SetConsoleWindowSize(short x, short y);
 	void setFontSize(int size);
 
-	bool drawPrecisely(char **text, int tlx, int tly, int width, int height)const;
+	bool drawPrecisely(char **text, int tlx, int tly, int width, int height, char filler = '%')const;
 	bool drawBoxesInRange(Box **boxes, int cntBoxes, int tlx, int tly, int brx, int bry, const Damage &damage = { 0,0 })const;
 
 	bool drawGrass(int tlx, int tly, int brx, int bry);
 	bool drawCloud(int tlx, int tly);
+	bool drawLogo(int tlx = DEF_CONSOLE_WIDTH /2 + DEF_FREE_BEG / 2, int tly = DEF_CONSOLE_HEIGHT / 2);
+	bool drawFromFile(const char *directory, int tlx = DEF_CONSOLE_WIDTH / 2 + DEF_FREE_BEG / 2, int tly = 1);
+
 
 	bool drawBoarder(int tlx, int tly, int brx, int bry);
 	bool clearBoarder(int tlx, int tly, int brx, int bry);

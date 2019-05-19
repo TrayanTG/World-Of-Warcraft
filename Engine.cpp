@@ -256,18 +256,22 @@ void Engine::initInventory(Box **boxes, Button &equipItem, Button &sellItem, int
 			bool f = true;
 			for (int k = 0;k < cntBoxes;k++)
 			{
-				if (typeid(boxes[k]) != typeid(Ability*) && boxes[k]->getID() == myPlayer->items[i]->getID()) { f = false;break; }
+				if (typeid(*boxes[k]) != typeid(Ability) && boxes[k]->getID() == myPlayer->items[i]->getID()) 
+				{
+					f = false;
+					break; 
+				}
 			}
 			if (f) boxes[cntBoxes++] = myPlayer->items[i];
 		}
 	}
 	
-	equipItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
-	sellItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2 - 12, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
+	equipItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + TEMP_FIX);
+	sellItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2 - 12, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + TEMP_FIX);
 
 	for (int i = invBoxes;i < cntBoxes;i++)
 	{
-		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1));
+		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1) + TEMP_FIX);
 	}
 }
 
@@ -299,18 +303,29 @@ void Engine::initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox,
 			bool f = true;
 			for (int k = 0; k < invBoxes; k++)
 			{
-				if (typeid(boxes[k]) != typeid(Ability*) && Data::getIstance().items[i]->getID() == boxes[k]->getID()) f = false;
+				if (typeid(*boxes[k]) != typeid(Ability) && Data::getIstance().items[i]->getID() == boxes[k]->getID()) f = false;
 			}
-			if (f) boxes[cntBoxes++] = Data::getIstance().items[i];
+			if (f)
+			{
+				int id = Data::getIstance().items[i]->getID();
+				if (id < 15) //[0;14] - Weapons
+				{
+					if (typeid(*myPlayer) == typeid(Mage) && id % 3 != 0)continue;
+					if (typeid(*myPlayer) == typeid(Warrior) && id % 3 != 1)continue;
+					if (typeid(*myPlayer) == typeid(Paladin) && id % 3 != 2)continue;
+				}
+				if (Data::getIstance().items[i]->getMinLevel() > myPlayer->getLevel()) continue;
+				boxes[cntBoxes++] = Data::getIstance().items[i];
+			}
 		}
 	}
 
 	for (int i = invBoxes;i < cntBoxes;i++)
 	{
-		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1));
+		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1) + TEMP_FIX);
 	}
 
-	buyItem.setXY((DEF_CONSOLE_WIDTH + DEF_FREE_BEG - buyItem.getLen() - 2) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 3);
+	buyItem.setXY((DEF_CONSOLE_WIDTH + DEF_FREE_BEG - buyItem.getLen() - 2) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 4);
 }
 
 void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox)
@@ -349,14 +364,14 @@ void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Butto
 		if (f) boxes[cntBoxes++] = myPlayer->abilities[i];
 	}
 
-	eqSlot1.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4);
-	eqSlot2.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4);
-	eqSlot3.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
-	eqSlot4.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1);
+	eqSlot1.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4 + 2 * TEMP_FIX + 1);
+	eqSlot2.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4 + 2 * TEMP_FIX + 1);
+	eqSlot3.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + 2 * TEMP_FIX + 1);
+	eqSlot4.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + 2 * TEMP_FIX + 1);
 
 	for (int i = 0;i < cntBoxes - invBoxes;i++)
 	{
-		boxes[i+invBoxes]->setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + 1 + 2 * (i % 3) * (DEF_ABILITY_SIZE + 1), (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 5 + (i / 3)*(DEF_ABILITY_SIZE + 1));
+		boxes[i+invBoxes]->setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + 1 + 2 * (i % 3) * (DEF_ABILITY_SIZE + 1), (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 5 + (i / 3)*(DEF_ABILITY_SIZE + 1) + 2 * TEMP_FIX + 1);
 	}
 }
 
@@ -382,7 +397,9 @@ void Engine::logIn()
 	char chooseClass, chooseNewExist, name[MAX_NAME_LENGHT];
 	bool cheatTemp = false;
 // ---------------------------------------------
+choosePlayer:
 	Graphics::getInstance().drawClassChooseUI();
+	
 	do
 	{
 		chooseClass = _getch();
@@ -426,8 +443,13 @@ void Engine::logIn()
 		if (!iFile)
 		{
 			Graphics::getInstance().clearscreen();
-			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-			exit(-1);
+			std::cout << name << '(';
+			if (chooseClass == 'W')std::cout << "Warrior)";
+			else if (chooseClass == 'M')std::cout << "Mage)";
+			else std::cout << "Paladin)";
+			std::cout << " does not exist!";
+			std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+			goto choosePlayer;
 		}
 		myPlayer->loadPlayer(strcat(directory, "/"));
 		iFile.close();
@@ -482,6 +504,7 @@ void Engine::Home()
 	
 	Graphics::getInstance().clearscreen();
 	Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes);
+	Graphics::getInstance().drawLogo();
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now() + DEF_RENDER_TIME;
 	while (true)
 	{
@@ -656,7 +679,11 @@ void Engine::Inventory()
 exitInventory:
 	equipItem.setXY(-1, -1);
 	sellItem.setXY(-1, -1);
-	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++)
+	{
+		boxes[i]->setMarked(false);
+		boxes[i]->setXY(-1, -1);
+	}
 	if (t == 'H')Home();
 	if (t == 'S')Shop();
 	if (t == 'A')AbilityBook();
@@ -768,7 +795,11 @@ void Engine::Shop()
 	}
 exitShop:
 	buyItem.setXY(-1, -1);
-	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++)
+	{
+		boxes[i]->setMarked(false);
+		boxes[i]->setXY(-1, -1);
+	}
 	if (t == 'H')Home();
 	if (t == 'I')Inventory();
 	if (t == 'A')AbilityBook();
@@ -910,7 +941,11 @@ exitAbilityBook:
 	eqSlot2.setXY(-1, -1);
 	eqSlot3.setXY(-1, -1);
 	eqSlot4.setXY(-1, -1);
-	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++)
+	{
+		boxes[i]->setMarked(false);
+		boxes[i]->setXY(-1, -1);
+	}
 	if (t == 'H')Home();
 	if (t == 'S')Shop();
 	if (t == 'I')Inventory();
@@ -1063,8 +1098,6 @@ void Engine::Play(Enemy enemy)
 				}
 				default: break;
 				}
-				Graphics::getInstance().gotoxy(0, 0);
-				std::cout << currEvent << ' ' << Events << "       ";
 				if (playerDamage.Physical + playerDamage.Magical <= 0)break;
 				enemy.gainDamage(playerDamage);
 				text[0] = '-';text[1] = 0;temp[0] = 0;

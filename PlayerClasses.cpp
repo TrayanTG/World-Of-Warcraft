@@ -31,8 +31,8 @@ void Warrior::resetRes()
 
 Damage Warrior::dealDamage(int slot)
 {
+	if (res.Curr + eqAbilities[slot]->getResReq() > res.Max) return { -1,-1 };
 	Damage damage = Player::dealDamage(slot);
-	//std::cout << damage.Physical << ' ' << damage.Magical;system("pause");
 	if (damage.Physical + damage.Magical <= 0)return { -1,-1 };
 	res.increaseBy(eqAbilities[slot]->getResReq() / 2); //could be increased somewhere else as well!
 	return { ((100 + res.Curr) * damage.Physical) / 100, damage.Magical };
