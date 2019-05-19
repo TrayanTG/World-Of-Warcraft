@@ -7,17 +7,21 @@
 #include "PlayerClasses.h"
 
 class Engine
-{public:
+{public: 
 	static Engine s;
 	bool cheatOn;
 	
 	HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
 	HANDLE hin = GetStdHandle(STD_INPUT_HANDLE);
-	INPUT_RECORD InputRecord;
-	DWORD Events;
-	COORD coord = { 0, 0 };
+	INPUT_RECORD InputRecord[128];
+	DWORD Events, currEvent;
+	//COORD coord = { 0, 0 };
 	CONSOLE_CURSOR_INFO cci;
 	
+	const COORD &getCoord();
+	const WORD &getKey();
+	void resetEvents();
+
 	Engine();
 
 	Player *myPlayer;
@@ -42,7 +46,7 @@ public:
 	void initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
 	void initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
 	void loadMap(EnemyBox **enemies, int &enemyCnt);
-	void enemyMove(EnemyBox **enemies, int &enemyCnt, int currEnemy);
+	void enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy);
 
 	void logIn();
 	void Home();

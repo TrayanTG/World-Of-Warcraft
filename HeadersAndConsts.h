@@ -26,6 +26,8 @@ const int KEY_ARROW_DOWN = 40;
 const int KEY_ARROW_LEFT = 37;
 const int KEY_ARROW_RIGHT = 39;
 
+const std::chrono::milliseconds DEF_RENDER_TIME = std::chrono::milliseconds(50);
+const std::chrono::milliseconds DEF_ENEMY_MOVE_TIME = std::chrono::milliseconds(1500);
 
 const int MAX_INFOBOX_WIDTH = 16;
 const int MAX_PATH_LENGHT = 64;

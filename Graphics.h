@@ -40,6 +40,8 @@ public:
 	void setFontSize(int size);
 
 	bool drawPrecisely(char **text, int tlx, int tly, int width, int height)const;
+	bool drawBoxesInRange(Box **boxes, int cntBoxes, int tlx, int tly, int brx, int bry, const Damage &damage = { 0,0 })const;
+
 	bool drawGrass(int tlx, int tly, int brx, int bry);
 	bool drawCloud(int tlx, int tly);
 
@@ -51,10 +53,10 @@ public:
 	bool drawEnemy(const Enemy &enemy, int tlx, int tly)const;
 	bool drawPlayerUI(const Player &player, int tlx, int tly);
 	bool drawCharacterInfo(const Player &player, int tlx, int tly);
-	void drawHomeUI(const Player &player);
-	void drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem);
-	void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem);
-	void drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4);
+	void drawHomeUI(const Player &player, Box **boxes, int num, int tlx = 0, int tly = 0, int brx = DEF_FREE_BEG, int bry = DEF_CONSOLE_HEIGHT);
+	void drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem, int tlx = DEF_FREE_BEG, int tly = 0, int brx = DEF_CONSOLE_WIDTH, int bry = DEF_CONSOLE_HEIGHT);
+	void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem, int tlx=DEF_FREE_BEG, int tly=0, int brx = DEF_CONSOLE_WIDTH, int bry = DEF_CONSOLE_HEIGHT);
+	void drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int tlx = DEF_FREE_BEG, int tly = 0, int brx = DEF_CONSOLE_WIDTH, int bry = DEF_CONSOLE_HEIGHT);
 	void drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt);
 	void drawPlay(const Player &player, const Enemy &enemy);
 

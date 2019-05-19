@@ -51,6 +51,94 @@ int Box::getTLY()const
 	return tly;
 }
 
+int Box::ibTLX()const
+{
+	int ans;
+	int quadrant = getQuadrant();
+	switch (quadrant)
+	{
+		case 1:
+			ans = tlx - (DEF_INFOBOX_WIDTH - 2 * size);
+			break;
+		case 2:
+			ans = tlx;
+			break;
+		case 3:
+			ans = tlx;
+			break;
+		case 4:
+			ans = tlx - (DEF_INFOBOX_WIDTH - 2 * size);
+			break;
+	}
+	return ans;
+}
+
+int Box::ibTLY()const
+{
+	int ans;
+	int quadrant = getQuadrant();
+	switch (quadrant)
+	{
+		case 1:
+			ans = tly + size + 1;
+			break;
+		case 2:
+			ans = tly + size + 1;
+			break;
+		case 3:
+			ans = tly - getRows(DEF_INFOBOX_WIDTH) - 3;
+			break;
+		case 4:
+			ans = tly - getRows(DEF_INFOBOX_WIDTH) - 3;
+			break;
+	}
+	return ans;
+}
+
+int Box::ibBRX()const
+{
+	int ans;
+	int quadrant = getQuadrant();
+	switch (quadrant)
+	{
+		case 1:
+			ans = tlx + 2 * size;
+			break;
+		case 2:
+			ans = tlx + DEF_INFOBOX_WIDTH;
+			break;
+		case 3:
+			ans = tlx + DEF_INFOBOX_WIDTH;
+			break;
+		case 4:
+			ans = tlx + 2 * size;
+			break;
+	}
+	return ans;
+}
+
+int Box::ibBRY()const
+{
+	int ans;
+	int quadrant = getQuadrant();
+	switch (quadrant)
+	{
+		case 1:
+			ans = tly + size + 3 + getRows(DEF_INFOBOX_WIDTH);
+			break;
+		case 2:
+			ans = tly + size + getRows(DEF_INFOBOX_WIDTH) + 3;
+			break;
+		case 3:
+			ans = tly - 1;
+			break;
+		case 4:
+			ans = tly - 1;
+			break;
+	}
+	return ans;
+}
+
 bool Box::isWithin(int x, int y, int range)const //not tested
 {
 	if (x < 0 || y < 0 || x >= DEF_CONSOLE_WIDTH || y >= DEF_CONSOLE_HEIGHT)return false;
@@ -72,7 +160,6 @@ bool Box::setMarked(bool marked)
 bool Box::setXY(int x, int y)
 {
 	if (x < -1 || y < -1 || x >= DEF_CONSOLE_WIDTH - 2 * size  || y >= DEF_CONSOLE_HEIGHT - size)return false;
-	//std::cout << "here: " << name << std::endl;
 	tlx = x;
 	tly = y;
 	return true;
@@ -105,7 +192,7 @@ bool Box::hideBox()const
 
 bool Box::toggleInfoBox()const
 {
-	int quadrant = getQuadrant();
+	/*int quadrant = getQuadrant();
 	switch (quadrant)
 	{
 	case 1:
@@ -122,7 +209,8 @@ bool Box::toggleInfoBox()const
 		break;
 	default:
 		return false;
-	}
+	}*/
+	showInfoBox(ibTLX(), ibTLY(), ibBRX(), ibBRY());
 	return true;
 }
 

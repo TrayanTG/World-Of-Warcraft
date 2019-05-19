@@ -20,6 +20,10 @@ public:
 
 	int getTLX()const;
 	int getTLY()const;
+	int ibTLX()const;
+	int ibTLY()const;
+	int ibBRX()const;
+	int ibBRY()const;
 
 	bool isWithin(int x, int y, int range = 0)const; //not tested
 	bool isMarked()const;

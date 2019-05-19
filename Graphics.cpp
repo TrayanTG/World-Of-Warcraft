@@ -156,6 +156,39 @@ bool Graphics::drawPrecisely(char **text, int tlx, int tly, int width, int heigh
 	return true;
 }
 
+bool Graphics::drawBoxesInRange(Box **boxes, int cntBoxes, int tlx, int tly, int brx, int bry, const Damage &damage)const
+{
+	if (tlx < 0 || tly < 0 || brx > DEF_CONSOLE_WIDTH || bry > DEF_CONSOLE_HEIGHT) return false;
+	int fixed[128], cntFixed = 0;
+	for (int i = tly; i < bry; i++)
+	{
+		for (int j = tlx; j < brx; j++)
+		{
+			for (int k = 0;k < cntBoxes;k++)
+			{
+				if (boxes[k]->isWithin(j, i))
+				{
+					bool f = true;
+					for (int p = 0; p < cntFixed; p++)
+					{
+						if (p == k)
+						{
+							f = false;
+							break;
+						}
+					}
+					if (f)
+					{
+						boxes[k]->showBox(damage);
+						fixed[cntFixed++] = k;
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
 bool Graphics::drawGrass(int tlx, int tly, int brx, int bry)
 {
 	if (tlx < 0 || tly < 0 || brx > DEF_CONSOLE_WIDTH || bry > DEF_CONSOLE_HEIGHT)return false;
@@ -292,7 +325,7 @@ bool Graphics::drawFrame(const Character &character, int tlx, int tly)
 bool Graphics::drawPlayerUI(const Player &player, int tlx, int tly)
 {
 	if (tlx < 0 || tly < 0 || tlx + DEF_CHARACTER_WIDTH >= DEF_CONSOLE_WIDTH || tly + DEF_CHARACTER_HEIGHT >= DEF_CONSOLE_HEIGHT) return false;
-	clearBoarder(tlx, tly, tlx + DEF_CHARACTER_WIDTH, tly + DEF_CHARACTER_HEIGHT);
+	//clearBoarder(tlx, tly, tlx + DEF_CHARACTER_WIDTH, tly + DEF_CHARACTER_HEIGHT);
 	drawBoarder(tlx, tly, tlx + DEF_CHARACTER_WIDTH, tly + DEF_CHARACTER_HEIGHT);
 	drawPlayer(player, tlx, tly);
 
@@ -300,9 +333,9 @@ bool Graphics::drawPlayerUI(const Player &player, int tlx, int tly)
 	player.eqAbilities[0]->showBox(player.getTotalDamageStats());
 	player.eqAbilities[1]->setXY(tlx + DEF_ABILITY_SIZE * 2 + 1, tly + DEF_CHARACTER_HEIGHT + 1);
 	player.eqAbilities[1]->showBox(player.getTotalDamageStats());
-	player.eqAbilities[2]->setXY(tlx + 2 * (DEF_ABILITY_SIZE*2 + 1) + 1, tly + DEF_CHARACTER_HEIGHT + 1);
+	player.eqAbilities[2]->setXY(tlx + 2 * (DEF_ABILITY_SIZE * 2 + 1) + 1, tly + DEF_CHARACTER_HEIGHT + 1);
 	player.eqAbilities[2]->showBox(player.getTotalDamageStats());
-	player.eqAbilities[3]->setXY(tlx + 3 * (DEF_ABILITY_SIZE*2 + 1) + 1, tly + DEF_CHARACTER_HEIGHT + 1 );
+	player.eqAbilities[3]->setXY(tlx + 3 * (DEF_ABILITY_SIZE * 2 + 1) + 1, tly + DEF_CHARACTER_HEIGHT + 1);
 	player.eqAbilities[3]->showBox(player.getTotalDamageStats());
 
 	player.helmet->setXY(tlx + DEF_CHARACTER_WIDTH + 1, tly);
@@ -361,7 +394,7 @@ bool Graphics::drawEnemy(const Enemy &enemy, int tlx, int tly)const
 	while (iFile)
 	{
 		iFile.getline(enemyLook[height], DEF_ENEMY_WIDTH);
-		if (strlen(enemyLook[height]) > width) width = strlen(enemyLook[height]);
+		if (strlen(enemyLook[height]) > (size_t)width) width = strlen(enemyLook[height]);
 		height++;
 	}
 	bool f = drawPrecisely(enemyLook, DEF_CONSOLE_WIDTH-1-width, DEF_CONSOLE_HEIGHT-height-1, width, height);
@@ -604,62 +637,62 @@ void Graphics::drawEnterName()
 	std::cout << "Enter name: ";
 }
 
-void Graphics::drawHomeUI(const Player &player)
+void Graphics::drawHomeUI(const Player &player, Box **boxes, int num, int tlx, int tly, int brx, int bry)
 {
-	clearBoarder(0, 0, DEF_FREE_BEG, DEF_CONSOLE_HEIGHT - 1);
+	//clearBoarder(0, 0, DEF_FREE_BEG, DEF_CONSOLE_HEIGHT - 1);
 	drawPlayerUI(player, 0, 10);
-	drawCharacterInfo(player, 0, 0);
-	
-	clearBoarder(DEF_CHAR_INFO_WIDTH + 1, 0, DEF_CHAR_INFO_WIDTH + 19, DEF_CHAR_INFO_HEIGH);
-	drawBoarder(DEF_CHAR_INFO_WIDTH + 1, 0, DEF_CHAR_INFO_WIDTH + 19, DEF_CHAR_INFO_HEIGH);
 
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 1);std::cout << "Menu:";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 3);std::cout << "Home <H>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 4);std::cout << "Play <P>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 5);std::cout << "Shop <S>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 6);std::cout << "Inventory <I>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 7);std::cout << "AbilityBook <A>";
-	gotoxy(DEF_CHAR_INFO_WIDTH + 3, 8);std::cout << "Exit <E>";
+	if (tlx <= DEF_CHAR_INFO_WIDTH && tly <= DEF_CHAR_INFO_HEIGH)
+	{
+		drawCharacterInfo(player, 0, 0);
+	}
+	if (brx <= DEF_FREE_BEG && tly <= DEF_CHAR_INFO_HEIGH)
+	{
+		clearBoarder(DEF_CHAR_INFO_WIDTH + 1, 0, DEF_CHAR_INFO_WIDTH + 19, DEF_CHAR_INFO_HEIGH);
+		drawBoarder(DEF_CHAR_INFO_WIDTH + 1, 0, DEF_CHAR_INFO_WIDTH + 19, DEF_CHAR_INFO_HEIGH);
+
+		gotoxy(DEF_CHAR_INFO_WIDTH + 3, 1);std::cout << "Menu:";
+		gotoxy(DEF_CHAR_INFO_WIDTH + 3, 3);std::cout << "Home <H>";
+		gotoxy(DEF_CHAR_INFO_WIDTH + 3, 4);std::cout << "Play <P>";
+		gotoxy(DEF_CHAR_INFO_WIDTH + 3, 5);std::cout << "Shop <S>";
+		gotoxy(DEF_CHAR_INFO_WIDTH + 3, 6);std::cout << "Inventory <I>";
+		gotoxy(DEF_CHAR_INFO_WIDTH + 3, 7);std::cout << "AbilityBook <A>";
+		gotoxy(DEF_CHAR_INFO_WIDTH + 3, 8);std::cout << "Exit <E>";
+	}
 }
 
-void Graphics::drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem)
+void Graphics::drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem, int tlx, int tly, int brx, int bry)
 {
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	//Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
-	Graphics::getInstance().clearBoarder(DEF_FREE_BEG, 0, DEF_CONSOLE_WIDTH - 1, DEF_CONSOLE_HEIGHT - 1);
 	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
 	equipItem.showButton();
 	sellItem.showButton();
-	for (int i = 0;i < num;i++) boxes[i]->showBox();
+	drawBoxesInRange(boxes, num, tlx, tly, brx, bry);
 }
 
-void Graphics::drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem)
+void Graphics::drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem, int tlx, int tly, int brx, int bry)
 {
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	//Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
-	Graphics::getInstance().clearBoarder(DEF_FREE_BEG, 0, DEF_CONSOLE_WIDTH - 1, DEF_CONSOLE_HEIGHT - 1);
 	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 1, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2);
 	buyItem.showButton();
-	for (int i = 0;i < num;i++) boxes[i]->showBox();
+	drawBoxesInRange(boxes, num, tlx, tly, brx, bry);
 }
 
-void Graphics::drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4)
+void Graphics::drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int tlx, int tly, int brx, int bry)
 {
 	int totalLenX = 6 * (DEF_ABILITY_SIZE + 1);
 	int totalLenY = 3 * (DEF_ABILITY_SIZE + 1);
 
-	//Graphics::getInstance().clearBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
-	Graphics::getInstance().clearBoarder(DEF_FREE_BEG, 0, DEF_CONSOLE_WIDTH - 1, DEF_CONSOLE_HEIGHT - 1);
 	Graphics::getInstance().drawBoarder(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 6, ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 5);
 	eqSlot1.showButton();
 	eqSlot2.showButton();
 	eqSlot3.showButton();
 	eqSlot4.showButton();
-	for (int i = 0;i < num;i++) (Ability*)boxes[i]->showBox(player.getTotalDamageStats());
+	drawBoxesInRange(boxes, num, tlx, tly, brx, bry, player.getTotalDamageStats());
 }
 
 void Graphics::drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt)
