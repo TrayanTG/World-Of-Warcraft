@@ -7,4 +7,5 @@ class EnemyBox: public Box, public Enemy
 public:
 	EnemyBox(char *tempBuff, const Enemy &enemy, int level);
 	EnemyBox(const EnemyBox&) = delete;
+	EnemyBox& operator= (const EnemyBox&) = delete; //Not sure
 };

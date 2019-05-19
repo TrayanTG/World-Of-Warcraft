@@ -771,3 +771,15 @@ void Graphics::drawPlay(const Player &player, const Enemy &enemy)
 	drawFrame(player, 3, 3);
 	drawFrame(enemy, DEF_CONSOLE_WIDTH - 25, 3);
 }
+
+
+
+bool Graphics::drawBoarder(const COORD &topLeft, const COORD &botRight)
+{
+	drawBoarder(topLeft.X, topLeft.Y, botRight.X, botRight.Y);
+}
+
+bool Graphics::clearBoarder(const COORD &topLeft, const COORD &botRight)
+{
+	clearBoarder(topLeft.X, topLeft.Y, botRight.X, botRight.Y);
+}

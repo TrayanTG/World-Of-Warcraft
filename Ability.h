@@ -1,5 +1,6 @@
 #pragma once
 #include "HeadersAndConsts.h"
+#include "Bar.h"
 #include "Box.h"
 #include "Damage.h"
 #include "Defence.h"
@@ -8,17 +9,14 @@
 class Ability : public Box
 {
 	int id;
-	int cd;
-	int cdRem;
+	Bar cd;
 	int minPower;
 	int maxPower;
 	int minLevel;
 	int resReq;
 public:
-	Ability(int id = -1, int cd = 0, int minPower = 0, int maxPower = 0, int minLevel = 0, int resReq = 0, const char *title = "", 
-		const char *description = "", const char *name = "", int size = DEF_ABILITY_SIZE, bool marked = false, int tlx = -1, int tly = -1);
-	Ability(const Ability&) = delete;
-	Ability& operator= (const Ability &other);
+	Ability(int id = -1, int cd = 0, int minPower = 0, int maxPower = 0, int minLevel = 0, int resReq = 0, const string &title = "", 
+		const string &description = "", const string &name = "", int size = DEF_ABILITY_SIZE, const COORD &topLeft = { -1,-1 }, bool marked = false);
 	Ability(std::ifstream &iFile);
 
 	int getID()const;
@@ -29,6 +27,8 @@ public:
 	int getResReq()const;
 	bool reduceCD(int ms);
 
-	virtual bool showBox(const Damage &damage)const;
+	Ability *clone()const;
+
+	virtual void showBox(const Damage &damage)const override;
 	void showCD()const;
 };

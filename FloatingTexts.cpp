@@ -2,40 +2,25 @@
 #include "Graphics.h"
 #include <iostream>
 
-FloatingTexts::FloatingTexts(int length, int height, int tlx, int tly)
+FloatingTexts::FloatingTexts(int length, int height, const COORD &topLeft): topLeft(topLeft)
 {
-	if (length < 0 || height < 0 || tlx < 0 || tly < 0 || length + tlx >= DEF_CONSOLE_WIDTH || height + tly >= DEF_CHARACTER_HEIGHT)
-	{
-		throw std::runtime_error("Floating text format error!");
-	}
+	if (length > MAX_SIZE) throw std::runtime_error("FloatingTexts(int, int, const COORD&) overflow!\n");
 	this->length = length;
 	this->height = height;
-	this->tlx = tlx;
-	this->tly = tly;
-	text = new char*[height];
+	text.resize(height);
 	for (int i = 0;i < height;i++)
 	{
-		text[i] = new char[length + 1];
-		strncpy(text[i], "                                    ", length);
+		text[i] = emptyLine;
 		text[i][length] = 0;
 	}
 }
 
-FloatingTexts::~FloatingTexts()
-{
-	for (int i = 0;i < height;i++)
-	{
-		delete[] text[i];
-	}
-	delete[] text;
-}
-
-void FloatingTexts::show(Colour foreground, Colour background)
+void FloatingTexts::show(Colour foreground, Colour background)const
 {
 	Graphics::getInstance().setcolor(foreground, background);
 	for (int i = 0;i < height;i++)
 	{
-		Graphics::getInstance().gotoxy(tlx, tly + height - (i + 1));
+		Graphics::getInstance().gotoxy(topLeft.X, topLeft.Y + height - (i + 1));
 		std::cout << text[i];
 	}
 	Graphics::getInstance().setcolor(White);
@@ -45,17 +30,18 @@ void FloatingTexts::update()
 {
 	for (int i = height - 1; i > 0;i--)
 	{
-		strcpy(text[i], text[i - 1]);
+		text[i] = text[i - 1];
 	}
-	strncpy(text[0], "                                    ", length);
+	text[0] = emptyLine;
+	text[0][length] = 0;
 }
 
-bool FloatingTexts::addText(const char *text)
+bool FloatingTexts::addText(const string &text)
 {
-	if (strlen(text) > (size_t)length)return false;
+	if (text.size() > (size_t)length)return false;
 	update();
-	strcpy(this->text[0], text);
-	strncat(this->text[0], "                                    ", length - strlen(this->text[0]));
+	this->text[0] = text;
+	this->text[0] += emptyLine;
 	this->text[0][length] = 0;
 	return true;
 }

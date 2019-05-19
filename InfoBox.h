@@ -3,18 +3,15 @@
 
 class InfoBox
 {
-	char *title;
-	char *description;
-
 protected:
+	string title;
+	string description;
+
 	int getRows(int width)const;
 
 public:
-	InfoBox(const char *title = "", const char *description = "");
-	InfoBox(const InfoBox &other) = delete;
-	InfoBox& operator= (const InfoBox &other);
-	~InfoBox();
+	InfoBox(const string &title = "", const string &description = "");
 
-	bool showInfoBox(int tlx, int tly, int brx, int bry)const;
-	bool clearInfoBox(int tlx, int tly, int brx, int bry)const;
+	bool showInfoBox(const COORD &topLeft, const COORD &botRight)const;
+	bool clearInfoBox(const COORD &topLeft, const COORD &botRight)const;
 };

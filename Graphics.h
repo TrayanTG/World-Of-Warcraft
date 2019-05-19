@@ -50,7 +50,7 @@ public:
 
 	bool drawBoarder(int tlx, int tly, int brx, int bry);
 	bool clearBoarder(int tlx, int tly, int brx, int bry);
-	bool drawButton(const Button &button);
+	bool drawButton(const Button &button); // VOID!!!!
 	bool drawFrame(const Character &character, int tlx, int tly);
 	bool drawPlayer(const Player &player, int tlx, int tly);
 	bool drawEnemy(const Enemy &enemy, int tlx, int tly)const;
@@ -67,5 +67,10 @@ public:
 	void drawMapChooseUI();
 	void drawNewOldUI();
 	void drawEnterName();
+
+
+
+	bool drawBoarder(const COORD &topLeft, const COORD &botRight);
+	bool clearBoarder(const COORD &topLeft, const COORD &botRight);
 
 };

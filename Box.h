@@ -4,35 +4,28 @@
 class Box : protected InfoBox
 {
 protected:
-	char *name;
+	string name;
+	COORD topLeft;
 	int size;
-	int tlx;
-	int tly;
 	bool marked;
 
 	int getQuadrant()const;
 
 public:
-	Box(const char *title = "", const char *description = "", const char *name = "", int size = 0, bool marked = false, int tlx = -1, int tly = -1);
-	Box(const Box&) = delete;
-	Box& operator= (const Box &other);
-	~Box();
+	Box(const string &title = "", const string &description = "", const string &name = "", int size = 0, const COORD &topLeft = { -1,-1 }, bool marked = false);
 
-	int getTLX()const;
-	int getTLY()const;
-	int ibTLX()const;
-	int ibTLY()const;
-	int ibBRX()const;
-	int ibBRY()const;
+	const COORD &getTopLeft()const;
+	const COORD &getInfoBoxTopLeft()const;
+	const COORD &getInfoBoxBotRight()const;
 
-	bool isWithin(int x, int y, int range = 0)const; //not tested
+	bool isWithin(const COORD &pos, int range = 0)const;
 	bool isMarked()const;
 	bool setMarked(bool marked = true);
-	bool setXY(int x, int y);
+	bool setXY(const COORD &topLeft);
 
 	virtual int getID()const;
-	virtual bool showBox(const Damage &damage = { 0,0 })const;
-	bool hideBox()const;
-	bool toggleInfoBox()const;
-	bool hideInfoBox()const;
+	virtual void showBox(const Damage &damage = { 0,0 })const;
+	void hideBox()const;
+	void toggleInfoBox()const;
+	void hideInfoBox()const;
 };

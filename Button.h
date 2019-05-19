@@ -3,22 +3,16 @@
 
 class Button
 {
-	int tlx;
-	int tly;
-	int lenght;
-	char *text;
+	string text;
+	COORD topLeft;
 public:
-	Button(const char *text, int tlx = -1, int tly = -1);
-	Button(const Button &other);
-	Button& operator= (const Button &other);
-	~Button();
+	Button(const string &text = "", const COORD &topLeft = { -1,-1 });
 
-	int getTLX()const;
-	int getTLY()const;
+	const COORD &getTopLeft()const;
 	int getLen()const;
-	const char *getText()const;
+	const string &getText()const;
 
-	bool setXY(int tlx, int tly);
-	bool showButton();
-	bool isWithin(int x, int y)const;
+	bool setXY(const COORD &topLeft);
+	void showButton();
+	bool isWithin(const COORD &pos)const;
 };
