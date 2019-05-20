@@ -5,35 +5,35 @@ class Warrior: public Player
 {
 
 public:
-	Warrior(const char *name = "");
+	Warrior(const string &name = "");
 
-	virtual bool levelUp();
-	virtual void regenRes();
-	virtual void resetRes();
-	virtual Damage dealDamage(int slot);
+	virtual bool levelUp() override;
+	virtual void regenRes() override;
+	virtual void resetRes() override;
+	virtual Damage dealDamage(int slot) override;
 };
 
 class Mage: public Player
 {
 
 public:
-	Mage(const char *name = "");
+	Mage(const string &name = "");
 
-	virtual bool levelUp();
-	virtual void regenRes();
-	virtual void resetRes();
-	virtual Damage dealDamage(int slot);
+	virtual bool levelUp() override;
+	virtual void regenRes() override;
+	virtual void resetRes() override;
+	virtual Damage dealDamage(int slot) override;
 };
 
 class Paladin: public Player
 {
 public:
-	Paladin(const char *name = "");
+	Paladin(const string &name = "");
 
 	bool gainCombo();
 
-	virtual bool levelUp();
-	virtual void regenRes();
-	virtual void resetRes();
-	virtual Damage dealDamage(int slot);
+	virtual bool levelUp() override;
+	virtual void regenRes() override;
+	virtual void resetRes() override;
+	virtual Damage dealDamage(int slot) override;
 };

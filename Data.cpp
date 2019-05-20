@@ -1,98 +1,140 @@
 #include "Data.h"
 
-Data Data::s;
+std::vector<Item*> Data::items;
+std::vector<Ability*> Data::abilities;
+std::vector<Enemy*> Data::enemies;
+
+const Weapon Data::emptyWeapon;
+const Armor Data::emptyArmor;
+const Ability Data::emptyAbility;
 
 Data::Data()
 {
-	items.reserve(DEF_LIST_SIZE);
+	
 }
 
 Data::~Data()
 {
 	for (size_t i = 0;i < enemies.size();i++)delete enemies[i];
-	enemies.clear();
 	for (size_t i = 0;i < items.size();i++)delete items[i];
-	items.clear();
 	for (size_t i = 0;i < abilities.size();i++)delete abilities[i];
-	abilities.clear();
-
-}
-
-Data& Data::getIstance()
-{
-	return s;
 }
 
 // --------------------------------------------------------------------------------
 
-Item *Data::getItemByID(int id)
+size_t Data::getItemCount()
+{
+	return items.size();
+}
+
+size_t Data::getAbilityCount()
+{
+	return abilities.size();
+}
+
+size_t Data::getEnemyCount()
+{
+	return enemies.size();
+}
+
+const Item &Data::getItem(int index)
+{
+	if ((size_t)index >= items.size())throw std::runtime_error("const Item &getItem(int) overflow!\n");
+	return *items[index];
+}
+
+const Ability &Data::getAbility(int index)
+{
+	if ((size_t)index >= abilities.size())throw std::runtime_error("const Ability &getAbility(int) overflow!\n");
+	return *abilities[index];
+}
+
+const Enemy &Data::getEnemy(int index)
+{
+	if ((size_t)index >= enemies.size())throw std::runtime_error("const Enemy &getEnemy(int) overflow!\n");
+	return *enemies[index];
+}
+
+const Item &Data::getItemByID(int id)
 {
 	for (size_t i = 0;i < items.size();i++)
 	{
 		if (items[i]->getID() == id)
 		{
-			return items[i];
+			return *items[i];
 		}
 	}
-	return nullptr;
+	throw std::runtime_error("const Item &getItemByID(int) bad call!\n");
 }
 
-Ability *Data::getAbilityByID(int id)
+const Ability &Data::getAbilityByID(int id)
 {
 	for (size_t i = 0;i < abilities.size();i++)
 	{
 		if (abilities[i]->getID() == id)
 		{
-			return abilities[i];
+			return *abilities[i];
 		}
 	}
-	return nullptr;
+	throw std::runtime_error("const Ability &getAbilityByID(int) bad call!\n");
 }
 
-Enemy *Data::getEnemyByID(int id)
+const Enemy &Data::getEnemyByID(int id)
 {
 	for (size_t i = 0;i < enemies.size();i++)
 	{
 		if (enemies[i]->getID() == id)
 		{
-			return enemies[i];
+			return *enemies[i];
 		}
 	}
-	return nullptr;
+	throw std::runtime_error("const Enemy &getEnemyByID(int) bad call!\n");
+}
+
+const Armor &Data::getEmptyArmor()
+{
+	return emptyArmor;
+}
+
+const Weapon &Data::getEmptyWeapon()
+{
+	return emptyWeapon;
+}
+
+const Ability &Data::getEmptyAbility()
+{
+	return emptyAbility;
 }
 
 void Data::addItem(std::ifstream &iFile)
 {
-	char type[MAX_NAME_LENGHT];
+	string type;
 	iFile >> type;
 	Item *temp;
-	if (!strcmp(type,"Weapon"))
+	if (type == "Weapon")
 	{
-		//std::cout << "good\n";
 		temp = new Weapon(iFile);
 		items.push_back(temp);
-		//delete[] temp; - dont delete! Using move constructor.....
-	}
-	else if (!strcmp(type,"Armor"))
+		}
+	else if (type == "Armor")
 	{
 		temp = new Armor(iFile);
 		items.push_back(temp);
 	}
 	else { std::cerr << "Invalid item type!\n"; }
+	// Don't delete *temp - using move constuctor!
 }
 
-void Data::loadItems(const char *directory)
+void Data::loadItems(const string &directory)
 {
-	char path[MAX_PATH_LENGHT], id[MAX_ID_LENGHT];
-	int index = 0, dirLen = strlen(directory);
-	strcpy(path, directory);
-	std::ifstream iFile(strcat(path, _itoa(index++, id, 10)));
+	char id[MAX_ID_LENGHT];
+	int index = 0;
+	std::ifstream iFile(directory + _itoa(index++, id, 10));
 	while(iFile)
 	{
 		addItem(iFile);
 		iFile.close();
-		path[dirLen] = 0;
-		iFile.open(strcat(path, _itoa(index++, id, 10)));
+		iFile.open(directory + _itoa(index++, id, 10));
 	}
 	iFile.close();
 }
@@ -104,18 +146,16 @@ void Data::addAbility(std::ifstream &iFile)
 	abilities.push_back(temp);
 }
 
-void Data::loadAbilities(const char *directory)
+void Data::loadAbilities(const string &directory)
 {
-	char path[MAX_PATH_LENGHT], id[MAX_ID_LENGHT];
-	int index = 0, dirLen = strlen(directory);
-	strcpy(path, directory);
-	std::ifstream iFile(strcat(path, _itoa(index++, id, 10)));
+	char id[MAX_ID_LENGHT];
+	int index = 0;
+	std::ifstream iFile(directory + _itoa(index++, id, 10));
 	while (iFile)
 	{
 		addAbility(iFile);
 		iFile.close();
-		path[dirLen] = 0;
-		iFile.open(strcat(path, _itoa(index++, id, 10)));
+		iFile.open(directory + _itoa(index++, id, 10));
 	}
 	iFile.close();
 }
@@ -127,18 +167,16 @@ void Data::addEnemy(std::ifstream &iFile)
 	enemies.push_back(temp);
 }
 
-void Data::loadEnemies(const char *directory)
+void Data::loadEnemies(const string &directory)
 {
-	char path[MAX_PATH_LENGHT], id[MAX_ID_LENGHT];
-	int index = 0, dirLen = strlen(directory);
-	strcpy(path, directory);
-	std::ifstream iFile(strcat(path, _itoa(index++, id, 10)));
+	char id[MAX_ID_LENGHT];
+	int index = 0;
+	std::ifstream iFile(directory + _itoa(index++, id, 10));
 	while (iFile)
 	{
 		addEnemy(iFile);
 		iFile.close();
-		path[dirLen] = 0;
-		iFile.open(strcat(path, _itoa(index++, id, 10)));
+		iFile.open(directory + _itoa(index++, id, 10));
 	}
 	iFile.close();
 }

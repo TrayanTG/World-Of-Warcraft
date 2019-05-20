@@ -11,12 +11,9 @@ class Enemy: public Character
 
 public:
 	Enemy(int id = -1, const Damage &damage = { 0,0 }, const Defence &defence = { 0,0,0 }, 
-		const Damage &levelUpDamage = { 0,0 }, const Defence &levelUpDefence = { 0,0 }, const char *name = "",
+		const Damage &levelUpDamage = { 0,0 }, const Defence &levelUpDefence = { 0,0 }, const string &name = "",
 		const Bar &HP = { 0,0 }, const Bar &res = { 0,0 }, int level = 1, int XP = 0, int gold = 0);
-	Enemy(const Enemy &other);
-	Enemy& operator= (const Enemy &other);
 	Enemy(std::ifstream &iFile);
-	~Enemy();
 
 	int getID()const;
 	void setLevel(int level);
@@ -24,12 +21,12 @@ public:
 	bool loadEnemy(std::ifstream &iFile);
 	bool saveEnemy(std::ofstream &oFile);
 
-	virtual bool levelUp();
-	virtual void resetRes();
-	virtual void regenRes();
-	virtual bool gainDamage(const Damage &damage);
-	virtual int calcDamage(const Damage &damage)const;
-	virtual Damage dealDamage(int slot = 0);
-	virtual Damage getTotalDamageStats()const;
-	virtual Defence getTotalDefenceStats()const;
+	virtual bool levelUp() override;
+	virtual void resetRes() override;
+	virtual void regenRes() override;
+	virtual Damage dealDamage(int slot = 0) override;
+	virtual Damage getTotalDamageStats()const override;
+	virtual Defence getTotalDefenceStats()const override;
+	virtual bool gainDamage(const Damage &damage) override;
+	virtual int calcDamage(const Damage &damage)const override;
 };

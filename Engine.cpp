@@ -4,23 +4,23 @@
 #include "HeadersAndConsts.h"
 #include "PlayerClasses.h"
 
-Engine Engine::s;
+//int index = 0;
+
+bool Engine::cheatOn = false;
+
+HANDLE Engine::hout = GetStdHandle(STD_OUTPUT_HANDLE);
+HANDLE Engine::hin = GetStdHandle(STD_INPUT_HANDLE);
+DWORD Engine::Events;
+DWORD Engine::currEvent;
+CONSOLE_CURSOR_INFO Engine::cci;
+INPUT_RECORD Engine::InputRecord[128];
+
+Player *Engine::myPlayer;
+string Engine::directory;
 
 Engine::Engine()
 {
-	HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
-	HANDLE hin = GetStdHandle(STD_INPUT_HANDLE);
 
-	cheatOn = false;
-	Data::getIstance().loadItems();
-	Data::getIstance().loadAbilities();
-	Data::getIstance().loadEnemies();
-
-	srand((size_t)time(0));
-	cci.dwSize = 25;
-	//cci.bVisible = TRUE;
-	SetConsoleCursorInfo(hout, &cci);
-	SetConsoleMode(hin, ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_MOUSE_INPUT);
 }
 
 Engine::~Engine()
@@ -28,12 +28,7 @@ Engine::~Engine()
 	delete[] myPlayer;
 }
 
-Engine& Engine::getInstance()
-{
-	return s;
-}
-
-const COORD &Engine::getCoord()
+COORD Engine::getCoord()
 {
 	return { InputRecord[currEvent].Event.MouseEvent.dwMousePosition.X, InputRecord[currEvent].Event.MouseEvent.dwMousePosition.Y };
 }
@@ -68,13 +63,13 @@ void Engine::randomizeEnemies(EnemyBox **enemies, int enemyCnt)
 		for (int j = 0;j < i;j++)
 		{
 
-			if (enemies[j]->isWithin(x, y, 2 * DEF_ENEMY_SIZE)){		
+			if (enemies[j]->isWithin({ x, y }, 2 * DEF_ENEMY_SIZE)) {
 				i--;
 				f = false;
 				break;
 			}
 		}
-		if (f) enemies[i]->setXY(x, y);
+		if (f) enemies[i]->setXY({ x, y });
 	}
 }
 
@@ -86,15 +81,15 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 		
 		switch (t)
 		{
-			case 0: break;
+		case 0: break;
 			case 1:
 			{
-				if (enemies[i]->getTLX() < 5) break;
+				if (enemies[i]->getTopLeft().X < 5) break;
 				bool f = true;
 				for (int j = 0;j < enemyCnt;j++)
 				{
 					if (j == i)continue;
-					if (enemies[j]->isWithin(enemies[i]->getTLX() - 4, enemies[i]->getTLY(), DEF_ENEMY_SIZE))
+					if (enemies[j]->isWithin({ enemies[i]->getTopLeft().X - 4, enemies[i]->getTopLeft().Y }, DEF_ENEMY_SIZE))
 					{
 						f = false;
 						break;
@@ -108,7 +103,7 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 						enemies[i]->hideInfoBox();
 						for (int j = 0;j < i;j++)enemies[j]->showBox();
 					}
-					enemies[i]->setXY(enemies[i]->getTLX() - 4, enemies[i]->getTLY());
+					enemies[i]->setXY({ enemies[i]->getTopLeft().X - 4, enemies[i]->getTopLeft().Y });
 					enemies[i]->showBox();
 //std::cout << enemies[i]->getHP().Curr;
 				}
@@ -116,12 +111,12 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 			}
 			case 2:
 			{
-				if (enemies[i]->getTLX() >= DEF_CONSOLE_WIDTH - 2 * (DEF_ENEMY_SIZE + 1)) break;
+				if (enemies[i]->getTopLeft().X >= DEF_CONSOLE_WIDTH - 2 * (DEF_ENEMY_SIZE + 1)) break;
 				bool f = true;
 				for (int j = 0;j < enemyCnt;j++)
 				{
 					if (j == i)continue;
-					if (enemies[j]->isWithin(enemies[i]->getTLX() + 4, enemies[i]->getTLY(), DEF_ENEMY_SIZE))
+					if (enemies[j]->isWithin({ enemies[i]->getTopLeft().X + 4, enemies[i]->getTopLeft().Y }, DEF_ENEMY_SIZE))
 					{
 						f = false;
 						break;
@@ -135,7 +130,7 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 						enemies[i]->hideInfoBox();
 						for (int j = 0;j < i;j++)enemies[j]->showBox();
 					}
-					enemies[i]->setXY(enemies[i]->getTLX() + 4, enemies[i]->getTLY());
+					enemies[i]->setXY({ enemies[i]->getTopLeft().X + 4, enemies[i]->getTopLeft().Y });
 					enemies[i]->showBox();
 //std::cout << enemies[i]->getHP().Curr;
 				}
@@ -143,12 +138,12 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 			}
 			case 3:
 			{
-				if (enemies[i]->getTLY() <= 0) break;
+				if (enemies[i]->getTopLeft().Y <= 0) break;
 				bool f = true;
 				for (int j = 0;j < enemyCnt;j++)
 				{
 					if (j == i)continue;
-					if (enemies[j]->isWithin(enemies[i]->getTLX(), enemies[i]->getTLY() - 1, DEF_ENEMY_SIZE))
+					if (enemies[j]->isWithin({ enemies[i]->getTopLeft().X, enemies[i]->getTopLeft().Y - 1 }, DEF_ENEMY_SIZE))
 					{
 						f = false;
 						break;
@@ -162,7 +157,7 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 						enemies[i]->hideInfoBox();
 						for (int j = 0;j < i;j++)enemies[j]->showBox();
 					}
-					enemies[i]->setXY(enemies[i]->getTLX(), enemies[i]->getTLY() - 1);
+					enemies[i]->setXY({ enemies[i]->getTopLeft().X, enemies[i]->getTopLeft().Y - 1 });
 					enemies[i]->showBox();
 //std::cout << enemies[i]->getHP().Curr;
 				}
@@ -170,12 +165,12 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 			}
 			case 4:
 			{
-				if (enemies[i]->getTLY() >= DEF_CONSOLE_WIDTH - (DEF_ENEMY_SIZE + 1)) break;
+				if (enemies[i]->getTopLeft().Y >= DEF_CONSOLE_WIDTH - (DEF_ENEMY_SIZE + 1)) break;
 				bool f = true;
 				for (int j = 0;j < enemyCnt;j++)
 				{
 					if (j == i)continue;
-					if (enemies[j]->isWithin(enemies[i]->getTLX(), enemies[i]->getTLY() + 1, DEF_ENEMY_SIZE))
+					if (enemies[j]->isWithin({ enemies[i]->getTopLeft().X, enemies[i]->getTopLeft().Y + 1 }, DEF_ENEMY_SIZE))
 					{
 						f = false;
 						break;
@@ -189,41 +184,40 @@ void Engine::enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy)
 						enemies[i]->hideInfoBox();
 						for (int j = 0;j < i;j++)enemies[j]->showBox();
 					}
-					enemies[i]->setXY(enemies[i]->getTLX(), enemies[i]->getTLY() + 1);
+					enemies[i]->setXY({ enemies[i]->getTopLeft().X, enemies[i]->getTopLeft().Y + 1 });
 					enemies[i]->showBox();
 //std::cout << enemies[i]->getHP().Curr;
 				}
 				break;
 			}
 		}
-		
 		for (DWORD i=0;i<Events;i++)
 		{
-			if (currEnemy >= 0 && enemies[currEnemy]->isWithin(InputRecord[i].Event.MouseEvent.dwMousePosition.X, InputRecord[i].Event.MouseEvent.dwMousePosition.Y))enemies[currEnemy]->toggleInfoBox(); // Not sure for the getCoord(???)
+			if (currEnemy >= 0 && enemies[currEnemy]->isWithin({ InputRecord[i].Event.MouseEvent.dwMousePosition.X, InputRecord[i].Event.MouseEvent.dwMousePosition.Y }))enemies[currEnemy]->toggleInfoBox(); // Not sure for the getCoord(???)
 		}
 	}
 }
 
 void Engine::initHome(Box **boxes, int &cntBoxes, int &currBox)
 {
-	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY({ -1, -1 });
 
 	cntBoxes = 0;
 	currBox = -1;
 	for (int i = 0;i < 4;i++)
 	{
-		if (myPlayer->eqAbilities[i]->getID() >= 0)
+		if (myPlayer->getEqAbility(i).getID() >= 0)
 		{
-			boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+			boxes[cntBoxes++] = myPlayer->getEqAbility(i).clone();
 		}
 	}
-	if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
-	if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
-	if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
-	if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
-	if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
-	if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
-	if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
+	if (myPlayer->getWeapon().getID() >= 0)boxes[cntBoxes++] = myPlayer->getWeapon().clone();
+	if (myPlayer->getHelmet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getHelmet().clone();
+	if (myPlayer->getShoulders().getID() >= 0)boxes[cntBoxes++] = myPlayer->getShoulders().clone();
+	if (myPlayer->getChest().getID() >= 0)boxes[cntBoxes++] = myPlayer->getChest().clone();
+	if (myPlayer->getGloves().getID() >= 0)boxes[cntBoxes++] = myPlayer->getGloves().clone();
+	if (myPlayer->getLegs().getID() >= 0)boxes[cntBoxes++] = myPlayer->getLegs().clone();
+	if (myPlayer->getFeet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getFeet().clone();
 }
 
 void Engine::initInventory(Box **boxes, Button &equipItem, Button &sellItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox)
@@ -231,47 +225,47 @@ void Engine::initInventory(Box **boxes, Button &equipItem, Button &sellItem, int
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY({ -1,-1 });
 
 	cntBoxes = 0;
 	currBox = invBoxes = markedBox = -1;
 	{
 		for (int i = 0;i < 4;i++)
 		{
-			if (myPlayer->eqAbilities[i]->getID() >= 0)
+			if (myPlayer->getEqAbility(i).getID() >= 0)
 			{
-				boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+				boxes[cntBoxes++] = myPlayer->getEqAbility(i).clone();
 			}
 		}
-		if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
-		if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
-		if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
-		if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
-		if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
-		if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
-		if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
+		if (myPlayer->getWeapon().getID() >= 0)boxes[cntBoxes++] = myPlayer->getWeapon().clone();
+		if (myPlayer->getHelmet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getHelmet().clone();
+		if (myPlayer->getShoulders().getID() >= 0)boxes[cntBoxes++] = myPlayer->getShoulders().clone();
+		if (myPlayer->getChest().getID() >= 0)boxes[cntBoxes++] = myPlayer->getChest().clone();
+		if (myPlayer->getGloves().getID() >= 0)boxes[cntBoxes++] = myPlayer->getGloves().clone();
+		if (myPlayer->getLegs().getID() >= 0)boxes[cntBoxes++] = myPlayer->getLegs().clone();
+		if (myPlayer->getFeet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getFeet().clone();
 		invBoxes = cntBoxes;
-		for (size_t i = 0;i < myPlayer->items.size();i++)
+		for (size_t i = 0;i < myPlayer->getItemCount();i++)
 		{
 			bool f = true;
 			for (int k = 0;k < cntBoxes;k++)
 			{
-				if (typeid(*boxes[k]) != typeid(Ability) && boxes[k]->getID() == myPlayer->items[i]->getID()) 
+				if (typeid(*boxes[k]) != typeid(Ability) && boxes[k]->getID() == myPlayer->getItem(i).getID()) 
 				{
 					f = false;
 					break; 
 				}
 			}
-			if (f) boxes[cntBoxes++] = myPlayer->items[i];
+			if (f) boxes[cntBoxes++] = myPlayer->getItem(i).clone();
 		}
 	}
 	
-	equipItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + TEMP_FIX);
-	sellItem.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2 - 12, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + TEMP_FIX);
+	equipItem.setXY({ ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + TEMP_FIX });
+	sellItem.setXY({ ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) + totalLenX) / 2 - 12, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + TEMP_FIX });
 
 	for (int i = invBoxes;i < cntBoxes;i++)
 	{
-		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1) + TEMP_FIX);
+		boxes[i]->setXY({ DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1) + TEMP_FIX });
 	}
 }
 
@@ -280,7 +274,7 @@ void Engine::initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox,
 	int totalLenX = 20 * (DEF_ITEM_SIZE + 1);
 	int totalLenY = 5 * (DEF_ITEM_SIZE + 1);
 
-	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY({ -1, -1 });
 
 	cntBoxes = 0;
 	currBox = invBoxes = markedBox = -1;
@@ -288,44 +282,51 @@ void Engine::initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox,
 	{
 		for (int i = 0;i < 4;i++)
 		{
-			if (myPlayer->eqAbilities[i]->getID() >= 0)
+			if (myPlayer->getEqAbility(i).getID() >= 0)
 			{
-				boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+				boxes[cntBoxes++] = myPlayer->getEqAbility(i).clone();
 			}
 		}
-		for (size_t i = 0;i < myPlayer->items.size();i++)
+		if (myPlayer->getWeapon().getID() >= 0)boxes[cntBoxes++] = myPlayer->getWeapon().clone();
+		if (myPlayer->getHelmet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getHelmet().clone();
+		if (myPlayer->getShoulders().getID() >= 0)boxes[cntBoxes++] = myPlayer->getShoulders().clone();
+		if (myPlayer->getChest().getID() >= 0)boxes[cntBoxes++] = myPlayer->getChest().clone();
+		if (myPlayer->getGloves().getID() >= 0)boxes[cntBoxes++] = myPlayer->getGloves().clone();
+		if (myPlayer->getLegs().getID() >= 0)boxes[cntBoxes++] = myPlayer->getLegs().clone();
+		if (myPlayer->getFeet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getFeet().clone();
+		for (size_t i = 0;i < myPlayer->getItemCount();i++)
 		{
-			boxes[cntBoxes++] = myPlayer->items[i];
+			boxes[cntBoxes++] = myPlayer->getItem(i).clone();
 		}
 		invBoxes = cntBoxes;
-		for (size_t i = 0;i < Data::getIstance().items.size();i++)
+		for (size_t i = 0;i < Data::getItemCount();i++)
 		{
 			bool f = true;
 			for (int k = 0; k < invBoxes; k++)
 			{
-				if (typeid(*boxes[k]) != typeid(Ability) && Data::getIstance().items[i]->getID() == boxes[k]->getID()) f = false;
+				if (typeid(*boxes[k]) != typeid(Ability) && Data::getItem(i).getID() == boxes[k]->getID()) f = false;
 			}
 			if (f)
 			{
-				int id = Data::getIstance().items[i]->getID();
+				int id = Data::getItem(i).getID();
 				if (id < 15) //[0;14] - Weapons
 				{
 					if (typeid(*myPlayer) == typeid(Mage) && id % 3 != 0)continue;
 					if (typeid(*myPlayer) == typeid(Warrior) && id % 3 != 1)continue;
 					if (typeid(*myPlayer) == typeid(Paladin) && id % 3 != 2)continue;
 				}
-				if (Data::getIstance().items[i]->getMinLevel() > myPlayer->getLevel()) continue;
-				boxes[cntBoxes++] = Data::getIstance().items[i];
+				if (Data::getItem(i).getMinLevel() > myPlayer->getLevel()) continue;
+				boxes[cntBoxes++] = Data::getItem(i).clone();
 			}
 		}
 	}
 
 	for (int i = invBoxes;i < cntBoxes;i++)
 	{
-		boxes[i]->setXY(DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1) + TEMP_FIX);
+		boxes[i]->setXY({ DEF_FREE_BEG + 19 + 2 * ((i - invBoxes) % 10) * (DEF_ITEM_SIZE + 1), 10 + ((i - invBoxes) / 10) * (DEF_ITEM_SIZE + 1) + TEMP_FIX });
 	}
 
-	buyItem.setXY((DEF_CONSOLE_WIDTH + DEF_FREE_BEG - buyItem.getLen() - 2) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 4);
+	buyItem.setXY({ (DEF_CONSOLE_WIDTH + DEF_FREE_BEG - buyItem.getLen() - 2) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 4 });
 }
 
 void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox)
@@ -333,45 +334,46 @@ void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Butto
 	int totalLenX = 6 * (DEF_ABILITY_SIZE + 1);
 	int totalLenY = 3 * (DEF_ABILITY_SIZE + 1);
 
-	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY(-1, -1);
+	for (int i = 0;i < cntBoxes;i++) boxes[i]->setXY({ -1, -1 });
 
 	cntBoxes = 0;
 	currBox = invBoxes = markedBox = -1;
 
 	for (int i = 0;i < 4;i++)
 	{
-		if (myPlayer->eqAbilities[i]->getID() >= 0)
+		if (myPlayer->getEqAbility(i).getID() >= 0)
 		{
-			boxes[cntBoxes++] = myPlayer->eqAbilities[i];
+			boxes[cntBoxes++] = myPlayer->getEqAbility(i).clone();
 		}
 	}
-	if (myPlayer->weapon->getID() >= 0)boxes[cntBoxes++] = myPlayer->weapon;
-	if (myPlayer->helmet->getID() >= 0)boxes[cntBoxes++] = myPlayer->helmet;
-	if (myPlayer->chest->getID() >= 0)boxes[cntBoxes++] = myPlayer->chest;
-	if (myPlayer->shoulders->getID() >= 0)boxes[cntBoxes++] = myPlayer->shoulders;
-	if (myPlayer->gloves->getID() >= 0)boxes[cntBoxes++] = myPlayer->gloves;
-	if (myPlayer->legs->getID() >= 0)boxes[cntBoxes++] = myPlayer->legs;
-	if (myPlayer->feet->getID() >= 0)boxes[cntBoxes++] = myPlayer->feet;
+	if (myPlayer->getWeapon().getID() >= 0)boxes[cntBoxes++] = myPlayer->getWeapon().clone();
+	if (myPlayer->getHelmet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getHelmet().clone();
+	if (myPlayer->getShoulders().getID() >= 0)boxes[cntBoxes++] = myPlayer->getShoulders().clone();
+	if (myPlayer->getChest().getID() >= 0)boxes[cntBoxes++] = myPlayer->getChest().clone();
+	if (myPlayer->getGloves().getID() >= 0)boxes[cntBoxes++] = myPlayer->getGloves().clone();
+	if (myPlayer->getLegs().getID() >= 0)boxes[cntBoxes++] = myPlayer->getLegs().clone();
+	if (myPlayer->getFeet().getID() >= 0)boxes[cntBoxes++] = myPlayer->getFeet().clone();
+
 	invBoxes = cntBoxes;
 
-	for (size_t i = 0;i < myPlayer->abilities.size();i++)
+	for (size_t i = 0;i < myPlayer->getAbilityCount();i++)
 	{
 		bool f = true;
 		for (int k = 0;k < invBoxes;k++)
 		{
-			if (typeid(*boxes[k]) == typeid(Ability) && boxes[k]->getID() == myPlayer->abilities[i]->getID()) { f = false;break; }
+			if (typeid(*boxes[k]) == typeid(Ability) && boxes[k]->getID() == myPlayer->getAbility(i).getID()) { f = false;break; }
 		}
-		if (f) boxes[cntBoxes++] = myPlayer->abilities[i];
+		if (f) boxes[cntBoxes++] = myPlayer->getAbility(i).clone();
 	}
 
-	eqSlot1.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4 + 2 * TEMP_FIX + 1);
-	eqSlot2.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4 + 2 * TEMP_FIX + 1);
-	eqSlot3.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + 2 * TEMP_FIX + 1);
-	eqSlot4.setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + 2 * TEMP_FIX + 1);
+	eqSlot1.setXY({ ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4 + 2 * TEMP_FIX + 1 });
+	eqSlot2.setXY({ ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 - 4 + 2 * TEMP_FIX + 1 });
+	eqSlot3.setXY({ ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + 2 * TEMP_FIX + 1 });
+	eqSlot4.setXY({ ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + eqSlot2.getLen() + 5, (DEF_CONSOLE_HEIGHT + totalLenY) / 2 + 1 + 2 * TEMP_FIX + 1 });
 
 	for (int i = 0;i < cntBoxes - invBoxes;i++)
 	{
-		boxes[i+invBoxes]->setXY(((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + 1 + 2 * (i % 3) * (DEF_ABILITY_SIZE + 1), (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 5 + (i / 3)*(DEF_ABILITY_SIZE + 1) + 2 * TEMP_FIX + 1);
+		boxes[i + invBoxes]->setXY({ ((DEF_CONSOLE_WIDTH + DEF_FREE_BEG) - totalLenX) / 2 + 1 + 2 * (i % 3) * (DEF_ABILITY_SIZE + 1), (DEF_CONSOLE_HEIGHT - totalLenY) / 2 - 5 + (i / 3)*(DEF_ABILITY_SIZE + 1) + 2 * TEMP_FIX + 1 });
 	}
 }
 
@@ -386,6 +388,7 @@ void Engine::updateCursor()
 	while (true)
 	{
 		if (Events && (currEvent < Events))continue;
+		//Graphics::gotoxy(0, 0); std::cout << InputRecord[0].Event.MouseEvent.dwMousePosition.X << ' ' << InputRecord[0].Event.MouseEvent.dwMousePosition.Y << "     ";
 		ReadConsoleInput(hin, InputRecord, 128, &Events);
 		currEvent = 0;
 	}
@@ -393,12 +396,12 @@ void Engine::updateCursor()
 
 void Engine::logIn()
 {
-	
-	char chooseClass, chooseNewExist, name[MAX_NAME_LENGHT];
+	char chooseClass, chooseNewExist;
+	string name;
 	bool cheatTemp = false;
 // ---------------------------------------------
 choosePlayer:
-	Graphics::getInstance().drawClassChooseUI();
+	Graphics::drawClassChooseUI();
 	
 	do
 	{
@@ -407,7 +410,7 @@ choosePlayer:
 		if (chooseClass == 'C') cheatTemp = true;
 	} while (chooseClass != 'W' && chooseClass != 'M' && chooseClass != 'P');
 // ---------------------------------------------
-	Graphics::getInstance().drawNewOldUI();
+	Graphics::drawNewOldUI();
 	do
 	{
 		chooseNewExist = _getch();
@@ -415,34 +418,36 @@ choosePlayer:
 		if (cheatTemp && chooseNewExist == 'H') cheatOn = true;
 	} while (chooseNewExist != 'N' && chooseNewExist != 'E');
 // ---------------------------------------------
-	Graphics::getInstance().drawEnterName();
-	Graphics::getInstance().setcolor(White);
+	Graphics::drawEnterName();
+	Graphics::setcolor(White);
 	std::cin >> name;
 // ---------------------------------------------
 	
-	if (chooseClass == 'W')myPlayer = new Warrior(name);
+	
+	if (chooseClass == 'W') {
+		myPlayer = new Warrior(name);
+	}
 	else if (chooseClass == 'P')myPlayer = new Paladin(name);
 	else myPlayer = new Mage(name);
 
-	char path[MAX_PATH_LENGHT];
-	strcpy(directory, "Data/Logs/");
-	if (chooseClass == 'W')strcat(directory, "Warriors/");
-	else if (chooseClass == 'P')strcat(directory, "Paladins/");
-	else strcat(directory, "Mages/");
-	strcat(directory, name);
+
+	directory = "Data/Logs/";
+	if (chooseClass == 'W')directory += "Warriors/";
+	else if (chooseClass == 'P')directory += "Paladins/";
+	else directory += "Mages/";
+	directory += name;
 
 	if (chooseNewExist == 'N')
 	{
-		_mkdir(directory);
-		myPlayer->savePlayer(strcat(directory, "/"));
+		_mkdir(directory.c_str());
+		myPlayer->savePlayer(directory += "/");
 	}
 	else
 	{
-		strcpy(path, directory);
-		std::ifstream iFile(strcat(path,"/CharacterInfo"));
+		std::ifstream iFile(directory + "/CharacterInfo");
 		if (!iFile)
 		{
-			Graphics::getInstance().clearscreen();
+			Graphics::clearscreen();
 			std::cout << name << '(';
 			if (chooseClass == 'W')std::cout << "Warrior)";
 			else if (chooseClass == 'M')std::cout << "Mage)";
@@ -451,18 +456,18 @@ choosePlayer:
 			std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 			goto choosePlayer;
 		}
-		myPlayer->loadPlayer(strcat(directory, "/"));
+		myPlayer->loadPlayer(directory += "/");
 		iFile.close();
 	}
-	Graphics::getInstance().init();
+	Graphics::init();
 }
 
 void Engine::loadMap(EnemyBox **enemies, int &enemyCnt)
 {
 	resetEvents();
-	char chooseMap, path[MAX_PATH_LENGHT], temp[4];
+	char chooseMap, temp[4];
 	int enemyIDs[MAX_ENEMY_CNT], index = 0;
-	Graphics::getInstance().drawMapChooseUI();
+	Graphics::drawMapChooseUI();
 	do
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -474,10 +479,10 @@ void Engine::loadMap(EnemyBox **enemies, int &enemyCnt)
 	} while (chooseMap != 'E' && chooseMap != 'D' && chooseMap != 'I');
 	// ---------------------------------------------
 	std::ifstream iFile;
-	strcpy(path, "Data/Maps/");
-	if (chooseMap == 'E')strcat(path, "ElwynnForest");
-	else if (chooseMap == 'D')strcat(path, "Durotar");
-	else strcat(path, "IsleOfGiants");
+	string path = "Data/Maps/";
+	if (chooseMap == 'E')path += "ElwynnForest";
+	else if (chooseMap == 'D')path += "Durotar";
+	else path += "IsleOfGiants";
 	iFile.open(path);
 	if (!iFile) exit(-1);
 	iFile >> enemyCnt;
@@ -489,7 +494,7 @@ void Engine::loadMap(EnemyBox **enemies, int &enemyCnt)
 	//for (int i = 0;i < enemyCnt;i++)std::cout << enemyIDs[i] << ' ';system("pause");
 	for (int i = 0;i < enemyCnt;i++)
 	{
-		enemies[i] = new EnemyBox(temp, *Data::getIstance().getEnemyByID(enemyIDs[i]), myPlayer->getLevel() + rand() % MAX_LEVEL_DIF);
+		enemies[i] = new EnemyBox(temp, Data::getEnemyByID(enemyIDs[i]), myPlayer->getLevel() + rand() % MAX_LEVEL_DIF);
 		//std::cout << enemies[i]->getHP().Max << ' ';system("pause");
 	}
 }
@@ -500,17 +505,19 @@ void Engine::Home()
 	char t = 0;
 	Box *boxes[16];
 	int cntBoxes = 0, currBox = -1, oldBox = -1;
+	Graphics::clearscreen();
+	Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes);
+	Graphics::drawLogo();
 	initHome(boxes, cntBoxes, currBox);
-	
-	Graphics::getInstance().clearscreen();
-	Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes);
-	Graphics::getInstance().drawLogo();
+
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now() + DEF_RENDER_TIME;
 	while (true)
 	{
 		myPlayer->savePlayer(directory);
 		for (; currEvent < Events; currEvent++)
 		{
+			//Graphics::gotoxy(0, 0); std::cout << getCoord().X << ' ' << getCoord().Y << "    ";
+
 			if (InputRecord[currEvent].EventType == KEY_EVENT)
 			{
 				switch (InputRecord[currEvent].Event.KeyEvent.wVirtualKeyCode)
@@ -528,7 +535,7 @@ void Engine::Home()
 				bool f = false;
 				for (int i = 0;i < cntBoxes;i++)
 				{
-					if (boxes[i]->isWithin(getCoord().X, getCoord().Y))
+					if (boxes[i]->isWithin({ getCoord().X, getCoord().Y }))
 					{
 						currBox = i;
 						f = true;
@@ -544,7 +551,7 @@ void Engine::Home()
 			if (oldBox >= 0 && oldBox != currBox)
 			{
 				boxes[oldBox]->hideInfoBox();
-				Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes, boxes[oldBox]->ibTLX(), boxes[oldBox]->ibTLY(), boxes[oldBox]->ibBRX(), boxes[oldBox]->ibBRY());
+				Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes, boxes[oldBox]->getInfoBoxTopLeft(), boxes[oldBox]->getInfoBoxBotRight());
 			}
 			if (currBox >= 0 && currBox != oldBox)
 			{
@@ -554,7 +561,7 @@ void Engine::Home()
 		}
 	}
 ExitHome:
-	for (int i = 0;i < cntBoxes;i++)boxes[i]->setXY(-1, -1);
+	for(int i=0;i<cntBoxes;i++) delete boxes[i];
 	if (t == 'I')Inventory();
 	if (t == 'S')Shop();
 	if (t == 'A')AbilityBook();
@@ -570,11 +577,11 @@ void Engine::Inventory()
 	int cntBoxes = 0, currBox = -1, oldBox = -1, invBoxes = -1, markedBox = -1;
 
 	initInventory(boxes, equipItem, sellItem, cntBoxes, currBox, invBoxes, markedBox);
-	
-	Graphics::getInstance().clearscreen();
-	Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-	Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes-invBoxes, equipItem, sellItem);
+	Graphics::clearscreen();
+	Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+	Graphics::drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes-invBoxes, equipItem, sellItem);
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now();
+
 	while (true)
 	{
 		myPlayer->savePlayer(directory);
@@ -595,26 +602,26 @@ void Engine::Inventory()
 				{
 					boxes[markedBox]->setMarked(false);
 					boxes[markedBox]->showBox();
-					if (equipItem.isWithin(getCoord().X, getCoord().Y))
+					if (equipItem.isWithin({ getCoord().X, getCoord().Y }))
 					{
-						myPlayer->equipItem((Item*)boxes[markedBox]);
+						myPlayer->equipItem(*(Item*)boxes[markedBox]);
 						initInventory(boxes, equipItem, sellItem, cntBoxes, currBox, invBoxes, markedBox);
-						Graphics::getInstance().clearscreen();
-						Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-						Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
+						Graphics::clearscreen();
+						Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+						Graphics::drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
 						markedBox = -1;
 					}
-					else if (sellItem.isWithin(getCoord().X, getCoord().Y))
+					else if (sellItem.isWithin({ getCoord().X, getCoord().Y }))
 					{
-						myPlayer->sellItem((Item*)boxes[markedBox]);
+						myPlayer->sellItem(*(Item*)boxes[markedBox]);
 						for (int i = markedBox + 1;i < cntBoxes;i++)
 						{
 							boxes[i - 1] = boxes[i];
 						}
 						cntBoxes--;
-						Graphics::getInstance().clearscreen();
-						Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-						Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
+						Graphics::clearscreen();
+						Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+						Graphics::drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem);
 						markedBox = -1;
 					}
 					else
@@ -650,7 +657,7 @@ void Engine::Inventory()
 				bool f = false;
 				for (int i = 0;i < cntBoxes;i++)
 				{
-					if (boxes[i]->isWithin(getCoord().X, getCoord().Y))
+					if (boxes[i]->isWithin({ getCoord().X, getCoord().Y }))
 					{
 						currBox = i;
 						f = true;
@@ -666,8 +673,8 @@ void Engine::Inventory()
 			if (oldBox >= 0 && oldBox != currBox)
 			{
 				boxes[oldBox]->hideInfoBox();
-				if (oldBox < invBoxes) Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes, boxes[oldBox]->ibTLX(), boxes[oldBox]->ibTLY(), boxes[oldBox]->ibBRX(), boxes[oldBox]->ibBRY());
-				else Graphics::getInstance().drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem, boxes[oldBox]->ibTLX(), boxes[oldBox]->ibTLY(), boxes[oldBox]->ibBRX(), boxes[oldBox]->ibBRY());
+				if (oldBox < invBoxes) Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes, boxes[oldBox]->getInfoBoxTopLeft(), boxes[oldBox]->getInfoBoxBotRight());
+				else Graphics::drawInventoryUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, equipItem, sellItem, boxes[oldBox]->getInfoBoxTopLeft(), boxes[oldBox]->getInfoBoxBotRight());
 			}
 			if (currBox >= 0 && currBox != oldBox)
 			{
@@ -677,13 +684,9 @@ void Engine::Inventory()
 		}
 	}
 exitInventory:
-	equipItem.setXY(-1, -1);
-	sellItem.setXY(-1, -1);
-	for (int i = 0;i < cntBoxes;i++)
-	{
-		boxes[i]->setMarked(false);
-		boxes[i]->setXY(-1, -1);
-	}
+	equipItem.setXY({ -1, -1 });
+	sellItem.setXY({ -1, -1 });
+	for (int i = 0;i < cntBoxes;i++) delete boxes[i];
 	if (t == 'H')Home();
 	if (t == 'S')Shop();
 	if (t == 'A')AbilityBook();
@@ -698,9 +701,9 @@ void Engine::Shop()
 	int cntBoxes = 0, currBox = -1, oldBox = -1, invBoxes = -1, markedBox = -1;
 	initShop(boxes, buyItem, cntBoxes, currBox, invBoxes, markedBox);
 
-	Graphics::getInstance().clearscreen();
-	Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-	Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
+	Graphics::clearscreen();
+	Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+	Graphics::drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now() + DEF_RENDER_TIME;
 
 	while (true)
@@ -723,13 +726,13 @@ void Engine::Shop()
 				{
 					boxes[markedBox]->setMarked(false);
 					boxes[markedBox]->showBox();
-					if (buyItem.isWithin(getCoord().X, getCoord().Y))
+					if (buyItem.isWithin({ getCoord().X, getCoord().Y }))
 					{
-						myPlayer->buyItem((Item*)boxes[markedBox]);
+						myPlayer->buyItem(*(Item*)boxes[markedBox]);
 						initShop(boxes, buyItem, cntBoxes, currBox, invBoxes, markedBox);
-						Graphics::getInstance().clearscreen();
-						Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-						Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
+						Graphics::clearscreen();
+						Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+						Graphics::drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem);
 						markedBox = -1;
 					}
 					else
@@ -767,7 +770,7 @@ void Engine::Shop()
 				bool f = false;
 				for (int i = 0;i < cntBoxes;i++)
 				{
-					if (boxes[i]->isWithin(getCoord().X, getCoord().Y))
+					if (boxes[i]->isWithin({ getCoord().X, getCoord().Y }))
 					{
 						currBox = i;
 						f = true;
@@ -783,8 +786,8 @@ void Engine::Shop()
 			if (oldBox >= 0 && oldBox != currBox)
 			{
 				boxes[oldBox]->hideInfoBox();
-				if (oldBox < invBoxes) Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes, boxes[oldBox]->ibTLX(), boxes[oldBox]->ibTLY(), boxes[oldBox]->ibBRX(), boxes[oldBox]->ibBRY());
-				else Graphics::getInstance().drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem, boxes[oldBox]->ibTLX(), boxes[oldBox]->ibTLY(), boxes[oldBox]->ibBRX(), boxes[oldBox]->ibBRY());
+				if (oldBox < invBoxes) Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes, boxes[oldBox]->getInfoBoxTopLeft(), boxes[oldBox]->getInfoBoxBotRight());
+				else Graphics::drawShopUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, buyItem, boxes[oldBox]->getInfoBoxTopLeft(), boxes[oldBox]->getInfoBoxBotRight());
 			}
 			if (currBox >= 0 && currBox != oldBox)
 			{
@@ -794,12 +797,9 @@ void Engine::Shop()
 		}
 	}
 exitShop:
-	buyItem.setXY(-1, -1);
-	for (int i = 0;i < cntBoxes;i++)
-	{
-		boxes[i]->setMarked(false);
-		boxes[i]->setXY(-1, -1);
-	}
+	buyItem.setXY({ -1, -1 });
+
+	for (int i = 0;i < cntBoxes;i++) delete boxes[i];
 	if (t == 'H')Home();
 	if (t == 'I')Inventory();
 	if (t == 'A')AbilityBook();
@@ -817,9 +817,9 @@ void Engine::AbilityBook()
 	int cntBoxes = 0, currBox = -1, oldBox = -1, invBoxes = -1, markedBox = -1;
 	initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
 
-	Graphics::getInstance().clearscreen();
-	Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-	Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+	Graphics::clearscreen();
+	Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+	Graphics::drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now() + DEF_RENDER_TIME;
 	while (true)
 	{
@@ -841,40 +841,40 @@ void Engine::AbilityBook()
 				{
 					boxes[markedBox]->setMarked(false);
 					boxes[markedBox]->showBox(myPlayer->getTotalDamageStats());
-					if (eqSlot1.isWithin(getCoord().X, getCoord().Y))
+					if (eqSlot1.isWithin({ getCoord().X, getCoord().Y }))
 					{
-						myPlayer->equipAbility((Ability*)boxes[markedBox], 0);
+						myPlayer->equipAbility(*(Ability*)boxes[markedBox], 0);
 						initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
-						Graphics::getInstance().clearscreen();
-						Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-						Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+						Graphics::clearscreen();
+						Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+						Graphics::drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
 						markedBox = -1;
 					}
-					else if (eqSlot2.isWithin(getCoord().X, getCoord().Y))
+					else if (eqSlot2.isWithin({ getCoord().X, getCoord().Y }))
 					{
-						myPlayer->equipAbility((Ability*)boxes[markedBox], 1);
+						myPlayer->equipAbility(*(Ability*)boxes[markedBox], 1);
 						initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
-						Graphics::getInstance().clearscreen();
-						Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-						Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+						Graphics::clearscreen();
+						Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+						Graphics::drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
 						markedBox = -1;
 					}
-					else if (eqSlot3.isWithin(getCoord().X, getCoord().Y))
+					else if (eqSlot3.isWithin({ getCoord().X, getCoord().Y }))
 					{
-						myPlayer->equipAbility((Ability*)boxes[markedBox], 2);
+						myPlayer->equipAbility(*(Ability*)boxes[markedBox], 2);
 						initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
-						Graphics::getInstance().clearscreen();
-						Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-						Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+						Graphics::clearscreen();
+						Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+						Graphics::drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
 						markedBox = -1;
 					}
-					else if (eqSlot4.isWithin(getCoord().X, getCoord().Y))
+					else if (eqSlot4.isWithin({ getCoord().X, getCoord().Y }))
 					{
-						myPlayer->equipAbility((Ability*)boxes[markedBox], 3);
+						myPlayer->equipAbility(*(Ability*)boxes[markedBox], 3);
 						initAilityBook(boxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, cntBoxes, currBox, invBoxes, markedBox);
-						Graphics::getInstance().clearscreen();
-						Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
-						Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
+						Graphics::clearscreen();
+						Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes);
+						Graphics::drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4);
 						markedBox = -1;
 					}
 					else
@@ -910,7 +910,7 @@ void Engine::AbilityBook()
 				bool f = false;
 				for (int i = 0;i < cntBoxes;i++)
 				{
-					if (boxes[i]->isWithin(getCoord().X, getCoord().Y))
+					if (boxes[i]->isWithin({ getCoord().X, getCoord().Y }))
 					{
 						currBox = i;
 						f = true;
@@ -926,8 +926,8 @@ void Engine::AbilityBook()
 			if (oldBox >= 0 && oldBox != currBox)
 			{
 				boxes[oldBox]->hideInfoBox();
-				if (oldBox < invBoxes) Graphics::getInstance().drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes, boxes[oldBox]->ibTLX(), boxes[oldBox]->ibTLY(), boxes[oldBox]->ibBRX(), boxes[oldBox]->ibBRY());
-				else Graphics::getInstance().drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, boxes[oldBox]->ibTLX(), boxes[oldBox]->ibTLY(), boxes[oldBox]->ibBRX(), boxes[oldBox]->ibBRY());
+				if (oldBox < invBoxes) Graphics::drawHomeUI(*myPlayer, boxes, cntBoxes - invBoxes, boxes[oldBox]->getInfoBoxTopLeft(), boxes[oldBox]->getInfoBoxBotRight());
+				else Graphics::drawAbilityBookUI(*myPlayer, &boxes[invBoxes], cntBoxes - invBoxes, eqSlot1, eqSlot2, eqSlot3, eqSlot4, boxes[oldBox]->getInfoBoxTopLeft(), boxes[oldBox]->getInfoBoxBotRight());
 			}
 			if (currBox >= 0 && currBox != oldBox)
 			{
@@ -937,15 +937,11 @@ void Engine::AbilityBook()
 		}
 	}
 exitAbilityBook:
-	eqSlot1.setXY(-1, -1);
-	eqSlot2.setXY(-1, -1);
-	eqSlot3.setXY(-1, -1);
-	eqSlot4.setXY(-1, -1);
-	for (int i = 0;i < cntBoxes;i++)
-	{
-		boxes[i]->setMarked(false);
-		boxes[i]->setXY(-1, -1);
-	}
+	eqSlot1.setXY({ -1, -1 });
+	eqSlot2.setXY({ -1, -1 });
+	eqSlot3.setXY({ -1, -1 });
+	eqSlot4.setXY({ -1, -1 });
+	for (int i = 0;i < cntBoxes;i++) delete boxes[i];
 	if (t == 'H')Home();
 	if (t == 'S')Shop();
 	if (t == 'I')Inventory();
@@ -960,8 +956,8 @@ void Engine::Map()
 	
 	loadMap(enemies, cntEnemies);
 	randomizeEnemies(enemies, cntEnemies);
-	Graphics::getInstance().init();
-	Graphics::getInstance().drawMap(playerPos, enemies, cntEnemies);
+	Graphics::init();
+	Graphics::drawMap(playerPos, enemies, cntEnemies);
 	initMouse();
 	std::chrono::steady_clock::time_point moveCD = std::chrono::steady_clock::now() + DEF_ENEMY_MOVE_TIME;
 	while (true)
@@ -969,12 +965,12 @@ void Engine::Map()
 		if (playerPos.first == 0 && playerPos.second == 0) Home();
 		for (int i = 0;i < cntEnemies;i++)//Check for battle
 		{
-			if (enemies[i]->isWithin(playerPos.first, playerPos.second))
+			if (enemies[i]->isWithin({ playerPos.first, playerPos.second }))
 			{
 				Enemy attackedEnemy = (Enemy)(*enemies[i]);
 				for (int j = 0;j < cntEnemies;j++)
 				{
-					delete[] enemies[j];
+					delete enemies[j];
 				}
 				Play(attackedEnemy);
 			}
@@ -983,7 +979,7 @@ void Engine::Map()
 		{
 			if (InputRecord[currEvent].EventType == KEY_EVENT)
 			{
-				Graphics::getInstance().gotoxy(playerPos.first, playerPos.second);std::cout << ' ';
+				Graphics::gotoxy(playerPos.first, playerPos.second);std::cout << ' ';
 				switch (InputRecord[currEvent].Event.KeyEvent.wVirtualKeyCode)
 				{
 				case KEY_ARROW_UP:
@@ -1000,14 +996,14 @@ void Engine::Map()
 
 					break;
 				}
-				Graphics::getInstance().gotoxy(playerPos.first, playerPos.second);std::cout << 'P';
+				Graphics::gotoxy(playerPos.first, playerPos.second);std::cout << 'P';
 			}
 			if (InputRecord[currEvent].EventType == MOUSE_EVENT)
 			{
 				bool f = false;
 				for (int i = 0;i < cntEnemies;i++)
 				{
-					if (enemies[i]->isWithin(getCoord().X, getCoord().Y))
+					if (enemies[i]->isWithin({ getCoord().X, getCoord().Y }))
 					{
 						currEnemy = i;
 						f = true;
@@ -1021,7 +1017,8 @@ void Engine::Map()
 		{//Nameplate render
 			if (oldEnemy >= 0 && oldEnemy != currEnemy)
 			{
-				enemies[oldEnemy]->hideInfoBox();
+				enemies[oldEnemy]->hideInfoBox();Graphics::drawBoxesInRange((Box**)enemies, cntEnemies, enemies[oldEnemy]->getInfoBoxTopLeft(), enemies[oldEnemy]->getInfoBoxBotRight());
+				Graphics::drawBoxesInRange((Box**)enemies, cntEnemies, enemies[oldEnemy]->getInfoBoxTopLeft(), enemies[oldEnemy]->getInfoBoxBotRight());
 			}
 			if (currEnemy >= 0 && currEnemy != oldEnemy)
 			{
@@ -1041,21 +1038,21 @@ void Engine::Map()
 
 void Engine::Play(Enemy enemy)
 {
-	char *text = new char[8];
+	string text;
 	char *temp = new char[7];
-	FloatingTexts playerFloatingDamageText(7, 6, 12, 10);
-	FloatingTexts enemyFloatingDamageText(7, 6, DEF_CONSOLE_WIDTH - 15, 10);
+	FloatingTexts playerFloatingDamageText(7, 6, { 12, 10 });
+	FloatingTexts enemyFloatingDamageText(7, 6, { DEF_CONSOLE_WIDTH - 15, 10 });
 	Damage playerDamage;
 	Damage enemyDamage;
 	myPlayer->setMaxHP();
 	myPlayer->resetRes();
 	enemy.setMaxHP();
-	Graphics::getInstance().drawPlay(*myPlayer, enemy);
+	Graphics::drawPlay(*myPlayer, enemy);
 	for (int i = 0;i < 4;i++)
 	{
-		myPlayer->eqAbilities[i]->reduceCD(myPlayer->eqAbilities[i]->getCD());
-		myPlayer->eqAbilities[i]->setXY(DEF_CONSOLE_WIDTH - 2 * DEF_FREE_BEG + (i - 1) * (2 * DEF_ABILITY_SIZE + 2), DEF_CONSOLE_HEIGHT - DEF_ABILITY_SIZE - 1);
-		myPlayer->eqAbilities[i]->showBox(myPlayer->getTotalDamageStats());
+		myPlayer->reduceCD(i, myPlayer->getEqAbility(i).getCD());
+		myPlayer->setEqAbilityXY(i, { DEF_CONSOLE_WIDTH - 2 * DEF_FREE_BEG + (i - 1) * (2 * DEF_ABILITY_SIZE + 2), DEF_CONSOLE_HEIGHT - DEF_ABILITY_SIZE - 1 });
+		myPlayer->getEqAbility(i).showBox(myPlayer->getTotalDamageStats());
 	}
 	std::chrono::steady_clock::time_point animationCD = std::chrono::steady_clock::now();
 	std::chrono::steady_clock::time_point enemyMove = std::chrono::steady_clock::now();
@@ -1074,25 +1071,25 @@ void Engine::Play(Enemy enemy)
 				{
 				case '1':
 				{
-					if (myPlayer->eqAbilities[0] == &Data::getIstance().emptyAbility)break;
+					if (myPlayer->getEqAbility(0).getID() == Data::getEmptyAbility().getID())break;
 					playerDamage = myPlayer->dealDamage(0);
 					break;
 				}
 				case '2':
 				{
-					if (myPlayer->eqAbilities[1] == &Data::getIstance().emptyAbility)break;
+					if (myPlayer->getEqAbility(1).getID() == Data::getEmptyAbility().getID())break;
 					playerDamage = myPlayer->dealDamage(1);
 					break;
 				}
 				case '3':
 				{
-					if (myPlayer->eqAbilities[2] == &Data::getIstance().emptyAbility)break;
+					if (myPlayer->getEqAbility(2).getID() == Data::getEmptyAbility().getID())break;
 					playerDamage = myPlayer->dealDamage(2);
 					break;
 				}
 				case '4':
 				{
-					if (myPlayer->eqAbilities[3] == &Data::getIstance().emptyAbility)break;
+					if (myPlayer->getEqAbility(3).getID() == Data::getEmptyAbility().getID())break;
 					playerDamage = myPlayer->dealDamage(3);
 					break;
 				}
@@ -1100,8 +1097,9 @@ void Engine::Play(Enemy enemy)
 				}
 				if (playerDamage.Physical + playerDamage.Magical <= 0)break;
 				enemy.gainDamage(playerDamage);
-				text[0] = '-';text[1] = 0;temp[0] = 0;
-				enemyFloatingDamageText.addText(strcat(text, _itoa(enemy.calcDamage(playerDamage), temp, 10)));
+				text = "-";
+				temp[0] = 0;
+				enemyFloatingDamageText.addText(text + _itoa(enemy.calcDamage(playerDamage), temp, 10));
 			}
 		}
 		if (std::chrono::steady_clock::now() >= frameUpdate)
@@ -1109,14 +1107,14 @@ void Engine::Play(Enemy enemy)
 			frameUpdate += std::chrono::milliseconds(100);
 			for (int i = 0;i < 4;i++)
 			{
-				if (myPlayer->eqAbilities[i]->getCDRem() > 0)
+				if (myPlayer->getEqAbility(i).getCDRem() > 0)
 				{
-					myPlayer->eqAbilities[i]->reduceCD(100);
-					myPlayer->eqAbilities[i]->showCD();
+					myPlayer->reduceCD(i,100);
+					myPlayer->getEqAbility(i).showCD();
 				}
 			}
 			myPlayer->regenRes();
-			Graphics::getInstance().drawFrame(*myPlayer, 3, 3);
+			Graphics::drawFrame(*myPlayer, { 3, 3 });
 			resetEvents();
 		}
 
@@ -1127,8 +1125,8 @@ void Engine::Play(Enemy enemy)
 			playerFloatingDamageText.show(LightRed);
 			enemyFloatingDamageText.update();
 			enemyFloatingDamageText.show(LightRed);
-			Graphics::getInstance().drawFrame(*myPlayer, 3, 3);
-			Graphics::getInstance().drawFrame(enemy, DEF_CONSOLE_WIDTH - 25, 3);
+			Graphics::drawFrame(*myPlayer, { 3, 3 });
+			Graphics::drawFrame(enemy, { DEF_CONSOLE_WIDTH - 25, 3 });
 		}
 
 		if (std::chrono::steady_clock::now() >= enemyMove)
@@ -1136,36 +1134,17 @@ void Engine::Play(Enemy enemy)
 			enemyMove += std::chrono::milliseconds(3000);
 			enemyDamage = enemy.dealDamage();
 			myPlayer->gainDamage(enemyDamage);
-			text[0] = '-';text[1] = 0;temp[0] = 0;
-			playerFloatingDamageText.addText(strcat(text, _itoa(myPlayer->calcDamage(enemyDamage), temp, 10)));
+			text = "-";
+			temp[0] = 0;
+			playerFloatingDamageText.addText(text + _itoa(myPlayer->calcDamage(enemyDamage), temp, 10));
+			playerFloatingDamageText.show(LightRed);
 		}
 	}
 	
 	// Results
-	Graphics::getInstance().setFontSize(DEF_CONSOLE_SIZE * 2);
-	Graphics::getInstance().SetConsoleWindowSize(DEF_CONSOLE_WIDTH / 2, DEF_CONSOLE_HEIGHT / 2);
-	Graphics::getInstance().clearscreen();
-	if (!myPlayer->isAlive())
-	{
-		std::cout << "You lost!\n";
-	}
-	else
-	{
-		std::cout << "You won!\n";
-		std::cout << "You received " << enemy.getGold() << " gold\n";
-		myPlayer->gainGold(enemy.getGold());
-		std::cout << "You received " << enemy.getXP() << " XP\n";
-		int currGold = myPlayer->getGold();
-		if (myPlayer->gainXP(enemy.getXP()))
-		{
-			std::cout << "You reaced " << myPlayer->getLevel() << " level!\n";
-			std::cout << "You received bonus " << myPlayer->getGold() - currGold << " gold!\n";
-		}
-	}
-	std::cout << "Press <H> to return to the home page!";
+	Graphics::drawResultsUI(*myPlayer, enemy);
 	std::chrono::steady_clock::time_point skipTime = std::chrono::steady_clock::now() + std::chrono::seconds(30);
 	resetEvents();
-	
 	while (true)
 	{
 		for (; currEvent < Events;currEvent++)
@@ -1176,14 +1155,13 @@ void Engine::Play(Enemy enemy)
 	}
 exitResultScreen:
 	delete[] temp;
-	delete[] text;
 	for (int i = 0;i < 4;i++)
 	{
-		myPlayer->eqAbilities[i]->reduceCD(myPlayer->eqAbilities[i]->getCD());
-		myPlayer->eqAbilities[i]->hideBox();
-		myPlayer->eqAbilities[i]->setXY(-1, -1);
+		myPlayer->reduceCD(i, myPlayer->getEqAbility(i).getCD());
+		myPlayer->getEqAbility(i).hideBox();
+		myPlayer->setEqAbilityXY(i, { -1, -1 });
 	}
-	Graphics::getInstance().setFontSize(DEF_CONSOLE_SIZE);
-	Graphics::getInstance().SetConsoleWindowSize(DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT);
+	Graphics::setFontSize(DEF_CONSOLE_SIZE);
+	Graphics::SetConsoleWindowSize(DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT);
 	Home();
 }

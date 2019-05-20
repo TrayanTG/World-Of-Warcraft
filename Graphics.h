@@ -9,63 +9,61 @@
 
 class Graphics
 {
-	static Graphics s;
-
 	Graphics();
 
-	void drawHelmet(const Armor *helmet, int tlx, int tly);
-	void drawShoulders(const Armor *shoulders, int tlx, int tly);
-	void drawChest(const Armor *chest, int tlx, int tly);
-	void drawGloves(const Armor *gloves, int tlx, int tly);
-	void drawLegs(const Armor *legs, int tlx, int tly);
-	void drawFeet(const Armor *feet, int tlx, int tly);
-	void drawStaff(int tlx, int tly);
-	void drawAxe(int tlx, int tly);
-	void drawWeapon(const Weapon *weapon, int tlx, int tly);
+	static void drawStaff(const Coord &topLeft);
+	static void drawAxe(const Coord &topLeft);
+	static void drawHelmet(const Armor &helmet, const Coord &topLeft);
+	static void drawShoulders(const Armor &shoulders, const Coord &topLeft);
+	static void drawChest(const Armor &chest, const Coord &topLeft);
+	static void drawGloves(const Armor &gloves, const Coord &topLeft);
+	static void drawLegs(const Armor &legs, const Coord &topLeft);
+	static void drawFeet(const Armor &feet, const Coord &topLeft);
+	static void drawWeapon(const Weapon &weapon, const Coord &topLeft);
 
 public:
 
 	Graphics(const Graphics&) = delete;
 	Graphics& operator=(const Graphics&) = delete;
 
+	static std::vector<string> fileToText(const string &directory, int &width);
+
 	~Graphics();
 
-	static Graphics& getInstance();
+	static void init();
+	static void gotoxy(int x, int y);
+	static void gotoxy(const Coord &pos);
+	static void setcolor(Colour foreground, Colour background = Black);
+	static void clearscreen();
+	static void SetConsoleWindowSize(short x, short y);
+	static void setFontSize(int size);
 
-	void init();
-	void gotoxy(int x, int y)const;
-	void setcolor(Colour foreground, Colour background = Black);
-	void clearscreen();
-	void SetConsoleWindowSize(short x, short y);
-	void setFontSize(int size);
+	static bool drawPrecisely(const std::vector<string> &text, const Coord &topLeft, char filler = '%');
+	static bool drawBoxesInRange(Box **boxes, int cntBoxes, const Coord &topLeft, const Coord &botRight, const Damage &damage = { 0,0 });
 
-	bool drawPrecisely(char **text, int tlx, int tly, int width, int height, char filler = '%')const;
-	bool drawBoxesInRange(Box **boxes, int cntBoxes, int tlx, int tly, int brx, int bry, const Damage &damage = { 0,0 })const;
+	static bool drawGrass(const Coord &topLeft, const Coord &botRight);
+	static bool drawCloud(const Coord &topLeft);
+	static bool drawLogo(const Coord &topLeft = { DEF_CONSOLE_WIDTH / 2 + DEF_FREE_BEG / 2, DEF_CONSOLE_HEIGHT / 2 });
+	static bool drawTextFromFile(const string &directory, const Coord &topLeft = { DEF_CONSOLE_WIDTH / 2 + DEF_FREE_BEG / 2,1 });
 
-	bool drawGrass(int tlx, int tly, int brx, int bry);
-	bool drawCloud(int tlx, int tly);
-	bool drawLogo(int tlx = DEF_CONSOLE_WIDTH /2 + DEF_FREE_BEG / 2, int tly = DEF_CONSOLE_HEIGHT / 2);
-	bool drawFromFile(const char *directory, int tlx = DEF_CONSOLE_WIDTH / 2 + DEF_FREE_BEG / 2, int tly = 1);
+	static bool drawBoarder(const Coord &topLeft, const Coord &botRight);
+	static bool clearBoarder(const Coord &topLeft, const Coord &botRight);
+	static bool drawButton(const Button &button); // VOID!!!!
+	static bool drawFrame(const Character &character, const Coord &topLeft);
+	static bool drawPlayer(const Player &player, const Coord &topLeft);
+	static bool drawEnemy(const Enemy &enemy, const Coord &topLeft);
+	static bool drawPlayerUI(Player &player, const Coord &topLeft);
+	static bool drawCharacterInfo(const Player &player, const Coord &topLeft);
+	static void drawHomeUI(Player &player, Box **boxes, int num, const Coord &topLeft = { 0,0 }, const Coord &botRight = { DEF_FREE_BEG,DEF_CONSOLE_HEIGHT });
+	static void drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem, const Coord &topLeft = { DEF_FREE_BEG,0 }, const Coord &botRight = { DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT });
+	static void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem, const Coord &topLeft = { DEF_FREE_BEG, 0 }, const Coord &botRight = { DEF_CONSOLE_WIDTH,DEF_CONSOLE_HEIGHT });
+	static void drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, const Coord &topLeft = { DEF_FREE_BEG,0 }, const Coord &botRight = { DEF_CONSOLE_WIDTH, DEF_CONSOLE_HEIGHT });
+	static void drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt);
+	static void drawPlay(const Player &player, const Enemy &enemy);
+	static void drawResultsUI(Player &player, const Enemy &enemy);
 
-
-	bool drawBoarder(int tlx, int tly, int brx, int bry);
-	bool clearBoarder(int tlx, int tly, int brx, int bry);
-	bool drawButton(const Button &button);
-	bool drawFrame(const Character &character, int tlx, int tly);
-	bool drawPlayer(const Player &player, int tlx, int tly);
-	bool drawEnemy(const Enemy &enemy, int tlx, int tly)const;
-	bool drawPlayerUI(const Player &player, int tlx, int tly);
-	bool drawCharacterInfo(const Player &player, int tlx, int tly);
-	void drawHomeUI(const Player &player, Box **boxes, int num, int tlx = 0, int tly = 0, int brx = DEF_FREE_BEG, int bry = DEF_CONSOLE_HEIGHT);
-	void drawInventoryUI(const Player &player, Box **boxes, int num, Button &equipItem, Button &sellItem, int tlx = DEF_FREE_BEG, int tly = 0, int brx = DEF_CONSOLE_WIDTH, int bry = DEF_CONSOLE_HEIGHT);
-	void drawShopUI(const Player &player, Box **boxes, int num, Button &buyItem, int tlx=DEF_FREE_BEG, int tly=0, int brx = DEF_CONSOLE_WIDTH, int bry = DEF_CONSOLE_HEIGHT);
-	void drawAbilityBookUI(const Player &player, Box **boxes, int num, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int tlx = DEF_FREE_BEG, int tly = 0, int brx = DEF_CONSOLE_WIDTH, int bry = DEF_CONSOLE_HEIGHT);
-	void drawMap(const std::pair<int, int> &pos, EnemyBox **enemies, int enemyCnt);
-	void drawPlay(const Player &player, const Enemy &enemy);
-
-	void drawClassChooseUI();
-	void drawMapChooseUI();
-	void drawNewOldUI();
-	void drawEnterName();
-
+	static void drawClassChooseUI();
+	static void drawMapChooseUI();
+	static void drawNewOldUI();
+	static void drawEnterName();
 };

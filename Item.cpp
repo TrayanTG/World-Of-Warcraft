@@ -1,8 +1,8 @@
 #include "Item.h"
 
-Item::Item(int id, int price, int minLevel, const char *title, const char *description, const char *name, int size,
-	bool marked, int tlx, int tly) :
-	Box(title, description, name, size, marked, tlx, tly)
+Item::Item(int id, int price, int minLevel, const string &title, const string &description, const string &name, int size, 
+	const Coord &topLeft, bool marked):
+	Box(title, description, name, size, topLeft, marked)
 {
 	this->id = id;
 	this->price = price;
@@ -11,7 +11,7 @@ Item::Item(int id, int price, int minLevel, const char *title, const char *descr
 
 Item::~Item()
 {
-	//std::cout << "Item destroyed!" << std::endl;
+	
 }
 
 int Item::getID()const

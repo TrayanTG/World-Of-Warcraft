@@ -1,43 +1,17 @@
 #include "Enemy.h"
 
 Enemy::Enemy(int id, const Damage &damage, const Defence &defence, const Damage &levelUpDamage, const Defence &levelUpDefence,
-	const char *name, const Bar &HP, const Bar &res, int level, int XP, int gold):
-	Character(damage, defence, name, HP, res, level, XP, gold)
+	const string &name, const Bar &HP, const Bar &res, int level, int XP, int gold):
+	Character(damage, defence, name, HP, res, level, XP, gold), levelUpDamage(levelUpDamage), levelUpDefence(levelUpDefence)
 {
 	this->id = id;
-	this->levelUpDamage = levelUpDamage;
-	this->levelUpDefence = levelUpDefence;
 	transferDefenceToHP();
 	setLevel(level);
-}
-
-Enemy::Enemy(const Enemy &other): Character(other)
-{
-	id = other.id;
-	levelUpDamage = other.levelUpDamage;
-	levelUpDefence = other.levelUpDefence;
-	transferDefenceToHP();
-}
-
-Enemy& Enemy::operator= (const Enemy &other)
-{
-	if (this == &other) return *this;
-	Character::operator=(other);
-	id = other.id;
-	levelUpDamage = other.levelUpDamage;
-	levelUpDefence = other.levelUpDefence;
-	transferDefenceToHP();
-	return *this;
 }
 
 Enemy::Enemy(std::ifstream &iFile)
 {
 	loadEnemy(iFile);
-}
-
-Enemy::~Enemy()
-{
-	//std::cout << "Enemy " << name << " deleted!" << std::endl;
 }
 
 void Enemy::setGold()

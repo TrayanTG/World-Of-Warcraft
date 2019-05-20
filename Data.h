@@ -7,34 +7,42 @@
 
 class Data
 {
-	static Data s;
-
 	Data();
 
-public:
+	static std::vector<Item*> items;
+	static std::vector<Ability*> abilities;
+	static std::vector<Enemy*> enemies;
 
+	static const Weapon emptyWeapon;
+	static const Armor emptyArmor;
+	static const Ability emptyAbility;
+
+public:
 	Data(const Data&) = delete;
 	Data& operator=(const Data&) = delete;
 
 	~Data();
 
-	static Data& getIstance();
+	static size_t getItemCount();
+	static size_t getAbilityCount();
+	static size_t getEnemyCount();
 
-	std::vector<Item*> items;
-	std::vector<Ability*> abilities;
-	std::vector<Enemy*> enemies;
+	static const Item &getItem(int index);
+	static const Ability &getAbility(int index);
+	static const Enemy &getEnemy(int index);
 
-	Item *getItemByID(int id);
-	Ability *getAbilityByID(int id);
-	Enemy *getEnemyByID(int id);
-	Weapon emptyWeapon;
-	Armor emptyArmor;
-	Ability emptyAbility;
+	static const Item &getItemByID(int id);
+	static const Ability &getAbilityByID(int id);
+	static const Enemy &getEnemyByID(int id);
+	
+	static const Armor &getEmptyArmor();
+	static const Weapon &getEmptyWeapon();
+	static const Ability &getEmptyAbility();
 
-	void loadEnemies(const char *directory = "Data/Enemies/");
-	void loadItems(const char *directory = "Data/Items/");
-	void loadAbilities(const char *directory = "Data/Abilities/");
-	void addEnemy(std::ifstream &iFile);
-	void addItem(std::ifstream &iFile);
-	void addAbility(std::ifstream &iFile);
+	static void loadEnemies(const string &directory = "Data/Enemies/");
+	static void loadItems(const string &directory = "Data/Items/");
+	static void loadAbilities(const string &directory = "Data/Abilities/");
+	static void addEnemy(std::ifstream &iFile);
+	static void addItem(std::ifstream &iFile);
+	static void addAbility(std::ifstream &iFile);
 };

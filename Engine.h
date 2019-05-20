@@ -8,51 +8,47 @@
 
 class Engine
 {public: 
-	static Engine s;
-	bool cheatOn;
+	static bool cheatOn;
 	
-	HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
-	HANDLE hin = GetStdHandle(STD_INPUT_HANDLE);
-	INPUT_RECORD InputRecord[128];
-	DWORD Events, currEvent;
-	//COORD coord = { 0, 0 };
-	CONSOLE_CURSOR_INFO cci;
+	static HANDLE hout;
+	static HANDLE hin;
+	static DWORD Events, currEvent;
+	static CONSOLE_CURSOR_INFO cci;
+	static INPUT_RECORD InputRecord[128];
 	
-	const COORD &getCoord();
-	const WORD &getKey();
-	void resetEvents();
+	static COORD getCoord();
+	static const WORD &getKey();
+	static void resetEvents();
 
 	Engine();
 
-	Player *myPlayer;
-	char directory[MAX_PATH_LENGHT];
+	static Player *myPlayer;
+	static string directory;
 
-	void randomizeEnemies(EnemyBox **enemies, int enemyCnt);
+	static void randomizeEnemies(EnemyBox **enemies, int enemyCnt);
 
 public:
-	void updateCursor();
+	static void updateCursor();
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
 
 	~Engine();
-	
-	static Engine& getInstance();
 
-	void initMouse();
-	void setCursorVisible(bool isVisible);
+	static void initMouse();
+	static void setCursorVisible(bool isVisible);
 
-	void initHome(Box **boxes, int &cntBoxes, int &currBox);
-	void initInventory(Box **boxes, Button &equipItem, Button &sellItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
-	void initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
-	void initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
-	void loadMap(EnemyBox **enemies, int &enemyCnt);
-	void enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy);
+	static void initHome(Box **boxes, int &cntBoxes, int &currBox);
+	static void initInventory(Box **boxes, Button &equipItem, Button &sellItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
+	static void initShop(Box **boxes, Button &buyItem, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
+	static void initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Button &eqSlot3, Button &eqSlot4, int &cntBoxes, int &currBox, int &invBoxes, int &markedBox);
+	static void loadMap(EnemyBox **enemies, int &enemyCnt);
+	static void enemyMove(EnemyBox **enemies, int &enemyCnt, int &currEnemy);
 
-	void logIn();
-	void Home();
-	void Inventory();
-	void Shop();
-	void AbilityBook();
-	void Map();
-	void Play(Enemy enemy);
+	static void logIn();
+	static void Home();
+	static void Inventory();
+	static void Shop();
+	static void AbilityBook();
+	static void Map();
+	static void Play(Enemy enemy);
 };

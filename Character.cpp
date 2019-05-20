@@ -1,13 +1,12 @@
 #include "Character.h"
 #include "Data.h"
 
-void Character::setCharacter(const Damage &damage, const Defence &defence, const char *name, 
+void Character::setCharacter(const Damage &damage, const Defence &defence, const string &name, 
 	const Bar &HP, const Bar &res, int level, int XP, int gold)
 {
 	this->damage = damage;
 	this->defence = defence;
-	this->name = new char[strlen(name) + 1];
-	strcpy(this->name, name);
+	this->name = name;
 	this->HP = HP;
 	this->res = res;
 	this->level = level;
@@ -16,62 +15,23 @@ void Character::setCharacter(const Damage &damage, const Defence &defence, const
 	transferDefenceToHP();
 }
 
-Character::Character(const Damage &damage, const Defence &defence, const char *name, const Bar &HP, const Bar &res, int level, int XP, int gold):
-	damage(damage), defence(defence), HP(HP), res(res)
+Character::Character(const Damage &damage, const Defence &defence, const string &name, const Bar &HP, const Bar &res, int level, int XP, int gold):
+	damage(damage), defence(defence), name(name), HP(HP), res(res)
 {
-	this->name = new char[strlen(name) + 1];
-	strcpy(this->name, name);
 	this->level = level;
 	this->XP = XP;
 	this->gold = gold;
 	transferDefenceToHP();
 }
 
-Character::Character(const Character &other):
-	damage(other.damage), defence(other.defence), HP(other.HP), res(other.res)
-{
-	name = new char[strlen(other.name) + 1];
-	strcpy(name, other.name);
-	level = other.level;
-	XP = other.XP;
-	gold = other.gold;
-	transferDefenceToHP();
-}
-
-Character& Character::operator= (const Character &other)
-{
-	if (this == &other) return *this;
-	setCharacter(other.damage, other.defence, other.name, other.HP, other.res, other.level, other.XP, other.gold);
-	return *this;
-}
-
 Character::Character(std::ifstream &iFile)
 {
-	char name[MAX_NAME_LENGHT];
-	Damage damage;
-	Defence defence;
-	Bar HP;
-	Bar res;
-	int level;
-	int XP;
-	int gold;
-
-	//std::cin.get(); PROBABLY
-	iFile.getline(name, MAX_NAME_LENGHT);
-	this->name = new char[strlen(name) + 1];
-	strcpy(this->name, name);
-	iFile >> damage.Physical >> damage.Magical;
-	iFile >> defence.Armor >> defence.MagicResist >> defence.Health;
-	iFile >> HP.Max >> HP.Curr;
-	iFile >> res.Max >> res.Curr;
-	iFile >> level >> XP >> gold;
-	setCharacter(damage, defence, name, HP, res, level, XP, gold);
+	loadCharacter(iFile);
 }
 
 Character::~Character()
 {
-	//std::cout << name << " deleted!" << std::endl;
-	delete[] name;
+	
 }
 
 void Character::transferDefenceToHP()
@@ -81,7 +41,7 @@ void Character::transferDefenceToHP()
 	defence.Health = 0;
 }
 
-const char *Character::getName()const
+const string &Character::getName()const
 {
 	return name;
 }
@@ -143,41 +103,28 @@ bool Character::isAlive()const
 	return HP.Curr > 0;
 }
 
-bool Character::loadCharacter(const char *directory)
+bool Character::loadCharacter(const string &directory)
 {
-	char path[MAX_PATH_LENGHT];
-	strcpy(path, directory);
-	std::ifstream iFile(strcat(path, "CharacterInfo"));
+	string path;
+	path = directory;
+	std::ifstream iFile(path + "CharacterInfo");
 	if (!iFile) return false;
 
-	char name[MAX_NAME_LENGHT];
-	Damage baseDamage;
-	Defence baseDefence;
-	Bar HP;
-	Bar res;
-	int level;
-	int XP;
-	int gold;
-
-	iFile.getline(name, MAX_NAME_LENGHT);
-	this->name = new char[strlen(name) + 1];
-	strcpy(this->name, name);
-	iFile >> baseDamage.Physical >> baseDamage.Magical;
-	iFile >> baseDefence.Armor >> baseDefence.MagicResist >> baseDefence.Health;
+	getline(iFile, name);
+	iFile >> damage.Physical >> damage.Magical;
+	iFile >> defence.Armor >> defence.MagicResist >> defence.Health;
 	iFile >> HP.Max >> HP.Curr;
 	iFile >> res.Max >> res.Curr;
 	iFile >> level >> XP >> gold;
-	setCharacter(baseDamage, baseDefence, name, HP, res, level, XP, gold);
 	iFile.close();
 	return true;
 }
 
-bool Character::saveCharacter(const char *directory)
+bool Character::saveCharacter(const string &directory)
 {
-	_mkdir(directory);
-	char path[MAX_PATH_LENGHT];
-	strcpy(path, directory);
-	std::ofstream oFile(strcat(path, "CharacterInfo"));
+	_mkdir(directory.c_str());
+	string path = directory;
+	std::ofstream oFile(path + "CharacterInfo");
 	if (!oFile) return false;
 	oFile << name << '\n';
 	oFile << damage.Physical << ' ' << damage.Magical << '\n';
@@ -192,25 +139,13 @@ bool Character::saveCharacter(const char *directory)
 bool Character::loadCharacter(std::ifstream &iFile)
 {
 	if (!iFile) return false;
-	char name[MAX_NAME_LENGHT];
-	Damage baseDamage;
-	Defence baseDefence;
-	Bar HP;
-	Bar res;
-	int level;
-	int XP;
-	int gold;
-
 	//std::cin.get(); PROBABLY
-	iFile.getline(name, MAX_NAME_LENGHT);
-	this->name = new char[strlen(name) + 1];
-	strcpy(this->name, name);
-	iFile >> baseDamage.Physical >> baseDamage.Magical;
-	iFile >> baseDefence.Armor >> baseDefence.MagicResist >> baseDefence.Health;
+	std::getline(iFile, name);
+	iFile >> damage.Physical >> damage.Magical;
+	iFile >> defence.Armor >> defence.MagicResist >> defence.Health;
 	iFile >> HP.Max >> HP.Curr;
 	iFile >> res.Max >> res.Curr;
 	iFile >> level >> XP >> gold;
-	setCharacter(baseDamage, baseDefence, name, HP, res, level, XP, gold);
 	return true;
 }
 

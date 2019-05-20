@@ -1,11 +1,11 @@
 #include "Weapon.h"
 #include "Graphics.h"
 
-Weapon::Weapon(int id, int price, int minLevel, const Damage &damage, WeaponType weaponType, const char *title, 
-	const char *description, const char *name, int size, bool marked, int tlx, int tly) :
-	Item(id, price, minLevel, title, description, name, size, marked, tlx, tly), damage(damage), weaponType(weaponType)
+Weapon::Weapon(int id, int price, int minLevel, const Damage &damage, WeaponType weaponType, const string &title, const string &description, 
+	const string &name, int size, const Coord &topLeft, bool marked):
+	Item(id, price, minLevel, title, description, name, size, topLeft, marked), damage(damage), weaponType(weaponType)
 {
-
+	
 }
 
 Weapon::Weapon(std::ifstream &iFile)
@@ -15,48 +15,47 @@ Weapon::Weapon(std::ifstream &iFile)
 	int minLevel;
 	Damage damage;
 	WeaponType weaponType;
-	char wType[MAX_WEAPONTYPE_LENGHT];
-	char title[MAX_INFOBOX_WIDTH - 2];
-	char description[MAX_DESCRIPTION_LENGHT];
-	char name[DEF_ITEM_SIZE*2];
+	string wType;
+	string title;
+	string description;
+	string name;
 
 	iFile >> id >> price >> minLevel;
 	iFile >> damage.Physical >> damage.Magical;
 	iFile >> wType;
-	if (!strcmp(wType, "Axe")) weaponType = Axe;
-	else if (!strcmp(wType, "Staff")) weaponType = Staff;
+	if (wType == "Axe") weaponType = Axe;
+	else if (wType == "Staff") weaponType = Staff;
 	else weaponType = uWeaponType;
 	iFile >> title;
 	iFile.get();
-	iFile.getline(description, MAX_DESCRIPTION_LENGHT);
-	iFile.getline(name, DEF_ITEM_SIZE*2);
+	std::getline(iFile, description);
+	std::getline(iFile, name);
 
-	*this = Weapon(id, price, minLevel, damage, weaponType, title, description, name, 3);
+	*this = Weapon(id, price, minLevel, damage, weaponType, title, description, name);
 }
 
-bool Weapon::showBox(const Damage &damage)const
+void Weapon::showBox(const Damage &damage)const
 {
-	if (Box::showBox() == false)return false;
+	Box::showBox();
 	if (id >= 0)
 	{
-		Graphics::getInstance().setcolor(LightRed);
+		Graphics::setcolor(LightRed);
 		std::cout << this->damage.Physical;
 		if (this->damage.Physical < 10)std::cout << ' ';
 		std::cout << ' ';
 		if (this->damage.Magical < 10)std::cout << ' ';
-		Graphics::getInstance().setcolor(LightBlue);
+		Graphics::setcolor(LightBlue);
 		std::cout << this->damage.Magical;
-		Graphics::getInstance().setcolor(White);
+		Graphics::setcolor(White);
 	}
 	else
 	{
 		for (int k = 0;k < DEF_ITEM_SIZE - 1;k++)
 		{
-			Graphics::getInstance().gotoxy(tlx + 1, tly + 1 + k);
+			Graphics::gotoxy(topLeft.X + 1, topLeft.Y + 1 + k);
 			for (int i = 0;i < 2 * DEF_ITEM_SIZE - 1;i++)std::cout << 'X';
 		}
 	}
-	return true;
 }
 
 Damage Weapon::getDamageStats()const
@@ -72,4 +71,9 @@ Defence Weapon::getDefenceStats()const
 WeaponType Weapon::getWeaponType()const
 {
 	return weaponType;
+}
+
+Item* Weapon::clone()const
+{
+	return new Weapon(*this);
 }

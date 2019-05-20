@@ -7,13 +7,13 @@ class Armor : public Item
 	ArmorType armorType;
 public:
 	Armor(int id = -1, int price = 0, int minLevel = 0, const Defence &defence = { 0, 0 }, 
-		ArmorType armorType = uArmorType, const char *title = "", const char *description = "",
-		const char *name = "", int size = DEF_ITEM_SIZE, bool marked = false, int tlx = -1, int tly = -1);
-	Armor(const Armor&) = delete;
+		ArmorType armorType = uArmorType, const string &title = "", const string &description = "",
+		const string &name = "", int size = DEF_ITEM_SIZE, const Coord &topLeft = { -1,-1 }, bool marked = false);
 	Armor(std::ifstream &iFile);
 
 	ArmorType getArmorType()const;
-	virtual bool showBox(const Damage &damage = { 0,0 })const;
-	virtual Damage getDamageStats()const;
-	virtual Defence getDefenceStats()const;
+	virtual void showBox(const Damage &damage = { 0,0 })const override;
+	virtual Damage getDamageStats()const override;
+	virtual Defence getDefenceStats()const override;
+	virtual Item* clone()const override;
 };

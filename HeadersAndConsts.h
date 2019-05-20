@@ -16,9 +16,13 @@
 #include <utility>
 #include <chrono>
 #include <conio.h>
+#include <string>
+#include "Coord.h"
 #include "Damage.h"
 #include "Defence.h"
 #include "Bar.h"
+
+using std::string;
 
 //const int KEY_ESC = 27;
 const int KEY_ARROW_UP = 38;

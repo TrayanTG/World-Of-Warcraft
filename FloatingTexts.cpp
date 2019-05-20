@@ -2,60 +2,51 @@
 #include "Graphics.h"
 #include <iostream>
 
-FloatingTexts::FloatingTexts(int length, int height, int tlx, int tly)
+int index = 0;
+
+const string FloatingTexts::emptyLine = "                                    ";
+const int FloatingTexts::MAX_LINE_SIZE = 36;
+
+FloatingTexts::FloatingTexts(int length, int height, const Coord &topLeft): topLeft(topLeft)
 {
-	if (length < 0 || height < 0 || tlx < 0 || tly < 0 || length + tlx >= DEF_CONSOLE_WIDTH || height + tly >= DEF_CHARACTER_HEIGHT)
-	{
-		throw std::runtime_error("Floating text format error!");
-	}
+	if (length > MAX_LINE_SIZE) throw std::runtime_error("FloatingTexts(int, int, const Coord&) overflow!\n");
 	this->length = length;
 	this->height = height;
-	this->tlx = tlx;
-	this->tly = tly;
-	text = new char*[height];
+	text.resize(height);
 	for (int i = 0;i < height;i++)
 	{
-		text[i] = new char[length + 1];
-		strncpy(text[i], "                                    ", length);
-		text[i][length] = 0;
+		text[i] = emptyLine;
+		text[i] = text[i].substr(0, length);
 	}
 }
 
-FloatingTexts::~FloatingTexts()
+void FloatingTexts::show(Colour foreground, Colour background)const
 {
+	Graphics::setcolor(foreground, background);
 	for (int i = 0;i < height;i++)
 	{
-		delete[] text[i];
-	}
-	delete[] text;
-}
-
-void FloatingTexts::show(Colour foreground, Colour background)
-{
-	Graphics::getInstance().setcolor(foreground, background);
-	for (int i = 0;i < height;i++)
-	{
-		Graphics::getInstance().gotoxy(tlx, tly + height - (i + 1));
+		Graphics::gotoxy(topLeft.X, topLeft.Y + height - (i + 1));
 		std::cout << text[i];
 	}
-	Graphics::getInstance().setcolor(White);
+	Graphics::setcolor(White);
 }
 
 void FloatingTexts::update()
 {
 	for (int i = height - 1; i > 0;i--)
 	{
-		strcpy(text[i], text[i - 1]);
+		text[i] = text[i - 1];
 	}
-	strncpy(text[0], "                                    ", length);
+	text[0] = emptyLine;
+	text[0] = text[0].substr(0, length);
 }
 
-bool FloatingTexts::addText(const char *text)
+bool FloatingTexts::addText(const string &text)
 {
-	if (strlen(text) > (size_t)length)return false;
+	if (text.size() > (size_t)length)return false;
 	update();
-	strcpy(this->text[0], text);
-	strncat(this->text[0], "                                    ", length - strlen(this->text[0]));
-	this->text[0][length] = 0;
+	this->text[0] = text;
+	this->text[0] += emptyLine;
+	this->text[0] = this->text[0].substr(0, length);
 	return true;
 }

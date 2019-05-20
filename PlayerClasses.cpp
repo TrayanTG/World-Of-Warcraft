@@ -1,13 +1,13 @@
 #include "PlayerClasses.h"
 #include "Data.h"
 
-Warrior::Warrior(const char *name): Player()
+Warrior::Warrior(const string &name): Player()
 {
-	buyItem(Data::getIstance().getItemByID(DEF_WARRIOR_WEAPON_ID), true);
-	equipItem(Data::getIstance().getItemByID(DEF_WARRIOR_WEAPON_ID));
+	buyItem(Data::getItemByID(DEF_WARRIOR_WEAPON_ID), true);
+	equipItem(Data::getItemByID(DEF_WARRIOR_WEAPON_ID));
 	setCharacter(DEF_WARRIOR_STARTER_DAMAGE, DEF_WARRIOR_STARTER_DEFENCE, name, DEF_STARTER_HP, DEF_WARRIOR_STARTER_RES, 1, 0);
-	damage += Data::getIstance().getItemByID(DEF_WARRIOR_WEAPON_ID)->getDamageStats();
-	defence += Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID)->getDefenceStats();
+	damage += Data::getItemByID(DEF_WARRIOR_WEAPON_ID).getDamageStats();
+	defence += Data::getItemByID(DEF_STARTER_LEGGINGS_ID).getDefenceStats();
 }
 
 bool Warrior::levelUp()
@@ -31,22 +31,22 @@ void Warrior::resetRes()
 
 Damage Warrior::dealDamage(int slot)
 {
-	if (res.Curr + eqAbilities[slot]->getResReq() > res.Max) return { -1,-1 };
+	if (res.Curr + eqAbilities[slot].getResReq() > res.Max) return { -1,-1 };
 	Damage damage = Player::dealDamage(slot);
 	if (damage.Physical + damage.Magical <= 0)return { -1,-1 };
-	res.increaseBy(eqAbilities[slot]->getResReq() / 2); //could be increased somewhere else as well!
+	res.increaseBy(eqAbilities[slot].getResReq() / 2); //could be increased somewhere else as well!
 	return { ((100 + res.Curr) * damage.Physical) / 100, damage.Magical };
 }
 
 // --------------------------------------------------
 
-Mage::Mage(const char *name) : Player()
+Mage::Mage(const string &name) : Player()
 {
-	buyItem(Data::getIstance().getItemByID(DEF_MAGE_WEAPON_ID), true);
-	equipItem(Data::getIstance().getItemByID(DEF_MAGE_WEAPON_ID));
+	buyItem(Data::getItemByID(DEF_MAGE_WEAPON_ID), true);
+	equipItem(Data::getItemByID(DEF_MAGE_WEAPON_ID));
 	setCharacter(DEF_MAGE_STARTER_DAMAGE, DEF_MAGE_STARTER_DEFENCE, name, DEF_STARTER_HP, DEF_MAGE_STARTER_RES, 1, 0);
-	damage += Data::getIstance().getItemByID(DEF_MAGE_WEAPON_ID)->getDamageStats();
-	defence += Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID)->getDefenceStats();
+	damage += Data::getItemByID(DEF_MAGE_WEAPON_ID).getDamageStats();
+	defence += Data::getItemByID(DEF_STARTER_LEGGINGS_ID).getDefenceStats();
 }
 
 bool Mage::levelUp()
@@ -70,22 +70,22 @@ void Mage::resetRes()
 
 Damage Mage::dealDamage(int slot)
 {
-	if (eqAbilities[slot]->getResReq() > res.Curr) return { -1,-1 };
+	if (eqAbilities[slot].getResReq() > res.Curr) return { -1,-1 };
 	Damage damage = Player::dealDamage(slot);
 	if (damage.Physical + damage.Magical <= 0)return { -1,-1 };
-	res.decreaseBy(eqAbilities[slot]->getResReq()); //could be increased somewhere else as well!
+	res.decreaseBy(eqAbilities[slot].getResReq()); //could be increased somewhere else as well!
 	return { damage.Physical, 2 * damage.Magical };
 }
 
 // --------------------------------------------------
 
-Paladin::Paladin(const char *name)
+Paladin::Paladin(const string &name)
 {
-	buyItem(Data::getIstance().getItemByID(DEF_PALADIN_WEAPON_ID), true);
-	equipItem(Data::getIstance().getItemByID(DEF_PALADIN_WEAPON_ID));
+	buyItem(Data::getItemByID(DEF_PALADIN_WEAPON_ID), true);
+	equipItem(Data::getItemByID(DEF_PALADIN_WEAPON_ID));
 	setCharacter(DEF_PALADIN_STARTER_DAMAGE, DEF_PALADIN_STARTER_DEFENCE, name, DEF_STARTER_HP, DEF_PALADIN_STARTER_RES, 1, 0);
-	damage += Data::getIstance().getItemByID(DEF_PALADIN_WEAPON_ID)->getDamageStats();
-	defence += Data::getIstance().getItemByID(DEF_STARTER_LEGGINGS_ID)->getDefenceStats();
+	damage += Data::getItemByID(DEF_PALADIN_WEAPON_ID).getDamageStats();
+	defence += Data::getItemByID(DEF_STARTER_LEGGINGS_ID).getDefenceStats();
 }
 
 bool Paladin::levelUp()
