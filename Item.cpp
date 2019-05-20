@@ -1,7 +1,7 @@
 #include "Item.h"
 
 Item::Item(int id, int price, int minLevel, const string &title, const string &description, const string &name, int size, 
-	const COORD &topLeft, bool marked) :
+	const Coord &topLeft, bool marked):
 	Box(title, description, name, size, topLeft, marked)
 {
 	this->id = id;

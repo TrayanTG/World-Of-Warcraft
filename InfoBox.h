@@ -12,6 +12,6 @@ protected:
 public:
 	InfoBox(const string &title = "", const string &description = "");
 
-	bool showInfoBox(const COORD &topLeft, const COORD &botRight)const;
-	bool clearInfoBox(const COORD &topLeft, const COORD &botRight)const;
+	bool showInfoBox(const Coord &topLeft, const Coord &botRight)const;
+	bool clearInfoBox(const Coord &topLeft, const Coord &botRight)const;
 };

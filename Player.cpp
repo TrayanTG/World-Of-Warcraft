@@ -11,6 +11,12 @@ Player::Player()// : Character()
 	transferDefenceToHP();
 }
 
+Player::~Player()
+{
+	for (size_t i = 0;i < items.size();i++)delete items[i];
+	for (size_t i = 0;i < abilities.size();i++)delete abilities[i];
+}
+
 void Player::init()
 {
 	abilities.clear();
@@ -23,56 +29,50 @@ void Player::init()
 	eqAbilities[3] = Data::getEmptyAbility();
 }
 
-const Item &Player::getItem(int index)const
-{
-	return *items[index];
-}
+size_t Player::getItemCount()const { return items.size(); };
+size_t Player::getAbilityCount()const { return abilities.size(); }
 
-const Ability &Player::getAbility(int index)const
-{
-	return *abilities[index];
-}
-
+const Item &Player::getItem(int index)const { return *items[index]; }
+const Ability &Player::getAbility(int index)const { return *abilities[index]; }
 const Ability &Player::getEqAbility(int index)const
 {
 	if (index >= 4)throw std::runtime_error("Ivalid Equipped Ability Slot!\n");
 	return eqAbilities[index];
 }
+const Armor &Player::getHelmet()const { return helmet; }
+const Armor &Player::getShoulders()const { return shoulders; }
+const Armor &Player::getChest()const { return chest; }
+const Armor &Player::getGloves()const { return gloves; }
+const Armor &Player::getLegs()const { return legs; }
+const Armor &Player::getFeet()const { return feet; }
+const Weapon &Player::getWeapon()const { return weapon; }
 
-const Armor &Player::getHelmet()const
+bool Player::reduceCD(int index, int ms)
 {
-	return helmet;
+	if (index >= 4)throw std::runtime_error("Invalid Equipped Ability Slot!\n");
+	return eqAbilities[index].reduceCD(ms);
 }
+bool Player::setItemXY(int index, const Coord &topLeft) { return items[index]->setXY(topLeft); }
+bool Player::setAbilityXY(int index, const Coord &topLeft) { return abilities[index]->setXY(topLeft); }
+bool Player::setEqAbilityXY(int index, const Coord &topLeft) { return eqAbilities[index].setXY(topLeft); }
+bool Player::setHelmetXY(const Coord &topLeft) { return helmet.setXY(topLeft); }
+bool Player::setShouldersXY(const Coord &topLeft) { return shoulders.setXY(topLeft); }
+bool Player::setChestXY(const Coord &topLeft) { return chest.setXY(topLeft); }
+bool Player::setGlovesXY(const Coord &topLeft) { return gloves.setXY(topLeft); }
+bool Player::setLegsXY(const Coord &topLeft) { return legs.setXY(topLeft); }
+bool Player::setFeetXY(const Coord &topLeft) { return feet.setXY(topLeft); }
+bool Player::setWeaponXY(const Coord &topLeft) { return weapon.setXY(topLeft); }
 
-const Armor &Player::getShoulders()const
-{
-	return shoulders;
-}
-
-const Armor &Player::getChest()const
-{
-	return chest;
-}
-
-const Armor &Player::getGloves()const
-{
-	return gloves;
-}
-
-const Armor &Player::getLegs()const
-{
-	return legs;
-}
-
-const Armor &Player::getFeet()const
-{
-	return feet;
-}
-
-const Weapon &Player::getWeapon()const
-{
-	return weapon;
-}
+bool Player::setItemMarked(int index, bool marked) { return items[index]->setMarked(marked); }
+bool Player::setAbilityMarked(int index, bool marked) { return abilities[index]->setMarked(marked); }
+bool Player::setEqAbilityMarked(int index, bool marked) { return eqAbilities[index].setMarked(marked); }
+bool Player::setHelmetMarked(bool marked) { return helmet.setMarked(marked); }
+bool Player::setShouldersMarked(bool marked) { return shoulders.setMarked(marked); }
+bool Player::setChestMarked(bool marked) { return chest.setMarked(marked); }
+bool Player::setGlovesMarked(bool marked) { return gloves.setMarked(marked); }
+bool Player::setLegsMarked(bool marked) { return legs.setMarked(marked); }
+bool Player::setFeetMarked(bool marked) { return feet.setMarked(marked); }
+bool Player::setWeaponMarked(bool marked) { return weapon.setMarked(marked); }
 
 bool Player::equipHelmet(const Item &eqHelmet)
 {
@@ -83,7 +83,6 @@ bool Player::equipHelmet(const Item &eqHelmet)
 	transferDefenceToHP();
 	return true;
 }
-
 bool Player::equipShoulders(const Item &eqShoulders)
 {
 	if (shoulders.getID() == eqShoulders.getID())return false;
@@ -93,7 +92,6 @@ bool Player::equipShoulders(const Item &eqShoulders)
 	transferDefenceToHP();
 	return true;
 }
-
 bool Player::equipChest(const Item &eqChest)
 {
 	if (chest.getID() == eqChest.getID())return false;
@@ -103,7 +101,6 @@ bool Player::equipChest(const Item &eqChest)
 	transferDefenceToHP();
 	return true;
 }
-
 bool Player::equipGloves(const Item &eqGloves)
 {
 	if (gloves.getID() == eqGloves.getID())return false;
@@ -113,7 +110,6 @@ bool Player::equipGloves(const Item &eqGloves)
 	transferDefenceToHP();
 	return true;
 }
-
 bool Player::equipLegs(const Item &eqLegs)
 {
 	if (legs.getID() == eqLegs.getID())return false;
@@ -123,7 +119,6 @@ bool Player::equipLegs(const Item &eqLegs)
 	transferDefenceToHP();
 	return true;
 }
-
 bool Player::equipFeet(const Item &eqFeet)
 {
 	if (feet.getID() == eqFeet.getID())return false;
@@ -133,7 +128,6 @@ bool Player::equipFeet(const Item &eqFeet)
 	transferDefenceToHP();
 	return true;
 }
-
 bool Player::equipWeapon(const Item &eqWeapon)
 {
 	if (weapon.getID() == eqWeapon.getID())return false;
@@ -252,6 +246,8 @@ bool Player::savePlayer(const string &directory)
 	return true;
 }
 
+// --------------------------------------------------------
+
 bool Player::buyItem(const Item &newItem, bool isFree)
 {
 	if (!isFree && gold < newItem.getPrice())return false;
@@ -266,8 +262,8 @@ bool Player::buyItem(const Item &newItem, bool isFree)
 
 bool Player::sellItem(const Item &soldItem)
 {
-	int i;
-	for (size_t i = 0;i < items.size();i++)
+	size_t i;
+	for (i = 0;i < items.size();i++)
 	{
 		if (items[i]->getID() == soldItem.getID())break;
 	}
@@ -319,7 +315,7 @@ bool Player::equipAbility(const Ability &eqAbility, int slot)
 	bool f = false;
 	for (size_t i = 0;i < abilities.size();i++)
 	{
-		if (abilities[i]->getID() == eqAbilities->getID())
+		if (abilities[i]->getID() == eqAbility.getID())
 		{
 			f = true;
 			break;

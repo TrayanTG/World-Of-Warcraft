@@ -16,7 +16,7 @@ class Ability : public Box
 	int resReq;
 public:
 	Ability(int id = -1, int cd = 0, int minPower = 0, int maxPower = 0, int minLevel = 0, int resReq = 0, const string &title = "", 
-		const string &description = "", const string &name = "", int size = DEF_ABILITY_SIZE, const COORD &topLeft = { -1,-1 }, bool marked = false);
+		const string &description = "", const string &name = "", int size = DEF_ABILITY_SIZE, const Coord &topLeft = { -1,-1 }, bool marked = false);
 	Ability(std::ifstream &iFile);
 
 	int getID()const;

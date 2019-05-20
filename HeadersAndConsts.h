@@ -17,6 +17,7 @@
 #include <chrono>
 #include <conio.h>
 #include <string>
+#include "Coord.h"
 #include "Damage.h"
 #include "Defence.h"
 #include "Bar.h"

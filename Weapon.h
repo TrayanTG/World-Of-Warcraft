@@ -8,7 +8,7 @@ class Weapon : public Item
 public:
 	Weapon(int id = -1, int price = 0, int minLevel = 0, const Damage &damage = { 0, 0 }, 
 		WeaponType weaponType = uWeaponType, const string &title = "", const string &description = "",
-		const string &name = "", int size = DEF_ITEM_SIZE, const COORD &topLeft = { -1,-1 }, bool marked = false);
+		const string &name = "", int size = DEF_ITEM_SIZE, const Coord &topLeft = { -1,-1 }, bool marked = false);
 	Weapon(std::ifstream &iFile);
 
 	WeaponType getWeaponType()const;

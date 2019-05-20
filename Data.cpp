@@ -4,20 +4,20 @@ std::vector<Item*> Data::items;
 std::vector<Ability*> Data::abilities;
 std::vector<Enemy*> Data::enemies;
 
+const Weapon Data::emptyWeapon;
+const Armor Data::emptyArmor;
+const Ability Data::emptyAbility;
+
 Data::Data()
 {
-	items.reserve(DEF_LIST_SIZE);
+	
 }
 
 Data::~Data()
 {
 	for (size_t i = 0;i < enemies.size();i++)delete enemies[i];
-	enemies.clear();
 	for (size_t i = 0;i < items.size();i++)delete items[i];
-	items.clear();
 	for (size_t i = 0;i < abilities.size();i++)delete abilities[i];
-	abilities.clear();
-
 }
 
 // --------------------------------------------------------------------------------

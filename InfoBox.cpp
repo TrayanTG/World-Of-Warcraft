@@ -23,19 +23,20 @@ int InfoBox::getRows(int width)const
 	return rows;
 }
 
-bool InfoBox::showInfoBox(const COORD &topLeft, const COORD &botRight)const
+bool InfoBox::showInfoBox(const Coord &topLeft, const Coord &botRight)const
 {
-	int width = topLeft.X - botRight.X;
+	int width = botRight.X - topLeft.X;
 	int rows = botRight.Y - topLeft.Y - 2;
-	if (width < MIN_INFOBOX_WIDTH || width>=MAX_INFOBOX_WIDTH)return false;
-
-	Graphics::getInstance().clearBoarder(topLeft, botRight);
-	Graphics::getInstance().drawBoarder(topLeft, botRight);
-	Graphics::getInstance().gotoxy(topLeft.X + 1, topLeft.Y + 1);std::cout << title;
+	//std::cout << 123;
+	if (width < MIN_INFOBOX_WIDTH || width>MAX_INFOBOX_WIDTH)return false;
+	//std::cout << 456;system("pause");
+	Graphics::clearBoarder(topLeft, botRight);
+	Graphics::drawBoarder(topLeft, botRight);
+	Graphics::gotoxy(topLeft.X + 1, topLeft.Y + 1);std::cout << title;
 	int index = 0;
 	for (int i = 0;i < rows;i++)
 	{
-		Graphics::getInstance().gotoxy(topLeft.X + 1, topLeft.Y + 2 + i);
+		Graphics::gotoxy(topLeft.X + 1, topLeft.Y + 2 + i);
 		for (int j = 0;j < width - 1;j++)
 		{
 			if (!description[index] || description[index] == '\n') 
@@ -49,10 +50,10 @@ bool InfoBox::showInfoBox(const COORD &topLeft, const COORD &botRight)const
 	return true;
 }
 
-bool InfoBox::clearInfoBox(const COORD &topLeft, const COORD &botRight)const
+bool InfoBox::clearInfoBox(const Coord &topLeft, const Coord &botRight)const
 {
 	int width = botRight.X - topLeft.X;
 	if (width < MIN_INFOBOX_WIDTH || width>=MAX_INFOBOX_WIDTH)return false;
-	Graphics::getInstance().clearBoarder(topLeft, botRight);
+	Graphics::clearBoarder(topLeft, botRight);
 	return true;
 }

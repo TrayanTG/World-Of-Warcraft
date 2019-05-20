@@ -13,9 +13,9 @@ class Data
 	static std::vector<Ability*> abilities;
 	static std::vector<Enemy*> enemies;
 
-	static Weapon emptyWeapon;
-	static Armor emptyArmor;
-	static Ability emptyAbility;
+	static const Weapon emptyWeapon;
+	static const Armor emptyArmor;
+	static const Ability emptyAbility;
 
 public:
 	Data(const Data&) = delete;

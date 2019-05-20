@@ -10,14 +10,19 @@ using namespace std;
 
 int main()
 {
-	Engine::getInstance().logIn();
-	Engine::getInstance().initMouse();
+	srand((size_t)time(0));
+	Data::loadItems();
+	Data::loadAbilities();
+	Data::loadEnemies();
 	
-	thread mouseThread(&Engine::updateCursor, &Engine::getInstance());
+	Engine::logIn();
+	Engine::initMouse();
+	
+	thread mouseThread(Engine::updateCursor); //su bez & ??? xD
 	mouseThread.detach();
 
-	Engine::getInstance().Home();
-	while (true);
+	Engine::Home();
+	while (true) ;
 	return 0;
 }
 

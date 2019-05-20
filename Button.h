@@ -4,15 +4,15 @@
 class Button
 {
 	string text;
-	COORD topLeft;
+	Coord topLeft;
 public:
-	Button(const string &text = "", const COORD &topLeft = { -1,-1 });
+	Button(const string &text = "", const Coord &topLeft = { -1,-1 });
 
-	const COORD &getTopLeft()const;
+	const Coord &getTopLeft()const;
 	int getLen()const;
 	const string &getText()const;
 
-	bool setXY(const COORD &topLeft);
+	bool setXY(const Coord &topLeft);
 	void showButton();
-	bool isWithin(const COORD &pos)const;
+	bool isWithin(const Coord &pos)const;
 };

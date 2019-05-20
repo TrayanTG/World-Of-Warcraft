@@ -25,9 +25,12 @@ private:
 	void init();
 
 public:
-	virtual ~Player() {}
+	virtual ~Player();
 
 	Player();
+
+	size_t getItemCount()const;
+	size_t getAbilityCount()const;
 
 	const Item &getItem(int index)const;
 	const Ability &getAbility(int index)const;
@@ -39,6 +42,29 @@ public:
 	const Armor &getLegs()const;
 	const Armor &getFeet()const;
 	const Weapon &getWeapon()const;
+
+	bool reduceCD(int index, int ms);
+	bool setItemXY(int index, const Coord &topLeft);
+	bool setAbilityXY(int index, const Coord &topLeft);
+	bool setEqAbilityXY(int index, const Coord &topLeft);
+	bool setHelmetXY(const Coord &topLeft);
+	bool setShouldersXY(const Coord &topLeft);
+	bool setChestXY(const Coord &topLeft);
+	bool setGlovesXY(const Coord &topLeft);
+	bool setLegsXY(const Coord &topLeft);
+	bool setFeetXY(const Coord &topLeft);
+	bool setWeaponXY(const Coord &topLeft);
+
+	bool setItemMarked(int index, bool marked);
+	bool setAbilityMarked(int index, bool marked);
+	bool setEqAbilityMarked(int index, bool marked);
+	bool setHelmetMarked(bool marked);
+	bool setShouldersMarked(bool marked);
+	bool setChestMarked(bool marked);
+	bool setGlovesMarked(bool marked);
+	bool setLegsMarked(bool marked);
+	bool setFeetMarked(bool marked);
+	bool setWeaponMarked(bool marked);
 
 	bool loadPlayer(const string &directory);
 	bool savePlayer(const string &directory);
