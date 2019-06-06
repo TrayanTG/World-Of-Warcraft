@@ -7,7 +7,7 @@
 #include "PlayerClasses.h"
 
 class Engine
-{public: 
+{ 
 	static bool cheatOn;
 	
 	static HANDLE hout;
@@ -28,7 +28,7 @@ class Engine
 	static void randomizeEnemies(EnemyBox **enemies, int enemyCnt);
 
 public:
-	static void updateCursor();
+	static void inputReader();
 	Engine(const Engine&) = delete;
 	Engine& operator=(const Engine&) = delete;
 

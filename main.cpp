@@ -18,11 +18,11 @@ int main()
 	Engine::logIn();
 	Engine::initMouse();
 	
-	thread mouseThread(Engine::updateCursor); //su bez & ??? xD
-	mouseThread.detach();
+	thread inputThread(Engine::inputReader);
+	inputThread.detach();
 
 	Engine::Home();
-	while (true) ;
+	//while (true) ;
 	return 0;
 }
 

@@ -379,16 +379,14 @@ void Engine::initAilityBook(Box **boxes, Button &eqSlot1, Button &eqSlot2, Butto
 
 void Engine::setCursorVisible(bool isVisible)
 {
-	if(!isVisible)cci.bVisible = FALSE;
-	else cci.bVisible = TRUE;
+	cci.bVisible = isVisible;
 }
 
-void Engine::updateCursor()
+void Engine::inputReader()
 {
 	while (true)
 	{
 		if (Events && (currEvent < Events))continue;
-		//Graphics::gotoxy(0, 0); std::cout << InputRecord[0].Event.MouseEvent.dwMousePosition.X << ' ' << InputRecord[0].Event.MouseEvent.dwMousePosition.Y << "     ";
 		ReadConsoleInput(hin, InputRecord, 128, &Events);
 		currEvent = 0;
 	}
